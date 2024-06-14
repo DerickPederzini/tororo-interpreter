@@ -54,9 +54,7 @@ public class Lexer(string input)
 
     public Token nextToken()
     {
-        Console.WriteLine("Entering");
         SkipWhiteSpaces();
-        Console.WriteLine("Exiting");
 
         Token tokens;
 
@@ -146,13 +144,13 @@ public class Lexer(string input)
         }
         else
         {
+            if(currentCharacter == '\0')
+                return Token.EOF;
+
             tokens = Token.Illegal;
         }
 
         readCharacter();
-
-        if(currentCharacter == '\0')
-            return Token.EOF;
 
         return tokens;
 
