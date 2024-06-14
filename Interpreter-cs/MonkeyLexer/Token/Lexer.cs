@@ -27,6 +27,7 @@ public class Lexer(string input)
         if (readPosition >= input.Length)
         {
             currentCharacter = '\0';//ASCII code for Null
+            
         }
         else
         {
@@ -58,58 +59,112 @@ public class Lexer(string input)
         Console.WriteLine("Exiting");
 
         Token tokens;
-    
-        if (currentCharacter == '=')
-           tokens = Token.EQUAL;
 
-        else if (currentCharacter == '+')
-           tokens = Token.PLUS;
+        if (currentCharacter == '+')
+            tokens = Token.PLUS;
 
         else if (currentCharacter == '-')
-           tokens = Token.MINUS;
+            tokens = Token.MINUS;
 
         else if (currentCharacter == ',')
-           tokens = Token.COMMA;
-        
+            tokens = Token.COMMA;
+
         else if (currentCharacter == '}')
-           tokens = Token.RBRACE;
+            tokens = Token.RBRACE;
 
         else if (currentCharacter == '{')
-           tokens = Token.LBRACE;
+            tokens = Token.LBRACE;
 
         else if (currentCharacter == ')')
-           tokens = Token.RPAREN;
+            tokens = Token.RPAREN;
 
         else if (currentCharacter == '(')
-           tokens = Token.LPAREN;
+            tokens = Token.LPAREN;
 
         else if (currentCharacter == ';')
-           tokens = Token.SEMICOLON;
+            tokens = Token.SEMICOLON;
+
+        else if (currentCharacter == '/')
+            tokens = Token.SLASH;
+
+        else if (currentCharacter == '*')
+            tokens = Token.MULTIPLY;
+
+        else if (currentCharacter == '>')
+            tokens = Token.RANGLE;
+
+        else if (currentCharacter == '<')
+            tokens = Token.LANGLE;
+
+        
+        else if (currentCharacter == '=')
+        {
+            char charAfterCurrent = peakChar();
+
+            if (charAfterCurrent == '=')
+            {
+                tokens = Token.EQUAL;
+                readCharacter();
+            }
+            else 
+                tokens = Token.ASSIGN;
+
+        }
+        else if (currentCharacter == '!')
+        {
+            char charAfterCurrent = peakChar();
+
+            if (charAfterCurrent == '=')
+            {
+                tokens = Token.NOTEQUAL;
+                readCharacter();
+            }
+                
+            else
+                tokens = Token.NOT;
+        }
 
         else if (Char.IsLetter(currentCharacter))
         {
-                //this is a very cool way of doing switches
-           return readIdentifier() switch
-           {
-               "fn" => Token.FUNCTION,
-               "let" => Token.LET,
-               var ident => new(TokenType.IDENT, ident.ToString()),
-           };
+            //this is a very cool way of doing switches
+            return readIdentifier() switch
+            {
+                "fn" => Token.FUNCTION,
+                "let" => Token.LET,
+                "if" => Token.IF,
+                "else" => Token.ELSE,
+                "true" => Token.TRUE,
+                "false" => Token.FALSE,
+                "return" => Token.RETURN,
+                var ident => new(TokenType.IDENT, ident.ToString()),
+            };
         }
         else if (Char.IsDigit(currentCharacter))
-        {  
-           tokens = new Token(TokenType.INT, readNumber());
-           return tokens;
+        {
+            tokens = new Token(TokenType.INT, readNumber());
+            return tokens;
         }
         else
         {
-           tokens = new Token(TokenType.EOF, currentCharacter.ToString());
+            tokens = Token.Illegal;
         }
 
         readCharacter();
 
+        if(currentCharacter == '\0')
+            return Token.EOF;
+
         return tokens;
 
+    }
+
+    public char peakChar()
+    {
+        if(readPosition >= input.Length)    
+        {
+            return '\0';
+        }
+        return input[readPosition];
     }
 
     public void SkipWhiteSpaces()

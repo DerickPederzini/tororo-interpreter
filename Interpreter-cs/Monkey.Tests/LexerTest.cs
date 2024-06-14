@@ -19,6 +19,15 @@ namespace Interpreter_cs.Monkey.Tests
                     x + y;
                 };
                 let result = add(five, ten);
+                !-/*5;
+                5 < 10 > 5;
+                if (5 < 10){
+                    return true;
+                }else{
+                    return false;
+                }
+                10 == 10;
+                9 != 10;    
                 """;
 
             var lexer = new Lexer(testInput);
@@ -27,17 +36,17 @@ namespace Interpreter_cs.Monkey.Tests
             {
                 new(TokenType.LET, "let"),
                 new(TokenType.IDENT, "five"),
-                new(TokenType.EQUAL, "="),
+                new(TokenType.ASSIGN, "="),
                 new(TokenType.INT, "5"),
                 new(TokenType.SEMICOLON, ";"),
                 new(TokenType.LET, "let"),
                 new(TokenType.IDENT, "ten"),
-                new(TokenType.EQUAL, "="),
+                new(TokenType.ASSIGN, "="),
                 new(TokenType.INT, "10"),
                 new(TokenType.SEMICOLON, ";"),
                 new(TokenType.LET, "let"),
                 new(TokenType.IDENT, "add"),
-                new(TokenType.EQUAL, "="),
+                new(TokenType.ASSIGN, "="),
                 new(TokenType.FUNCTION, "fn"),
                 new(TokenType.LPAREN, "("),
                 new(TokenType.IDENT, "x"),
@@ -53,13 +62,50 @@ namespace Interpreter_cs.Monkey.Tests
                 new(TokenType.SEMICOLON, ";"),
                 new(TokenType.LET, "let"),
                 new(TokenType.IDENT, "result"),
-                new(TokenType.EQUAL, "="),
+                new(TokenType.ASSIGN, "="),
                 new(TokenType.IDENT, "add"),
                 new(TokenType.LPAREN, "("),
                 new(TokenType.IDENT, "five"),
                 new(TokenType.COMMA, ","),
                 new(TokenType.IDENT, "ten"),
                 new(TokenType.RPAREN, ")"),
+                new(TokenType.SEMICOLON, ";"),
+                new(TokenType.NOT, "!"),
+                new(TokenType.MINUS, "-"),
+                new(TokenType.SLASH, "/"),
+                new(TokenType.MULTIPLY, "*"),
+                new(TokenType.INT, "5"),
+                new(TokenType.SEMICOLON, ";"),
+                new(TokenType.INT, "5"),
+                new(TokenType.LANGLE, "<"),
+                new(TokenType.INT, "10"),
+                new(TokenType.RANGLE, ">"),
+                new(TokenType.INT, "5"),
+                new(TokenType.SEMICOLON, ";"),
+                new(TokenType.IF, "if"),
+                new(TokenType.LPAREN, "("),
+                new(TokenType.INT, "5"),
+                new(TokenType.LANGLE, "<"),
+                new(TokenType.INT, "10"),
+                new(TokenType.RPAREN, ")"),
+                new(TokenType.LBRACE, "{"),
+                new(TokenType.RETURN, "return"),
+                new(TokenType.TRUE, "true"),
+                new(TokenType.SEMICOLON, ";"),
+                new(TokenType.RBRACE, "}"),
+                new(TokenType.ELSE, "else"),
+                new(TokenType.LBRACE, "{"),
+                new(TokenType.RETURN, "return"),
+                new(TokenType.FALSE, "false"),
+                new(TokenType.SEMICOLON, ";"),
+                new(TokenType.RBRACE, "}"),
+                new(TokenType.INT, "10"),
+                new(TokenType.EQUAL, "=="),
+                new(TokenType.INT, "10"),
+                new(TokenType.SEMICOLON, ";"),
+                new(TokenType.INT, "9"),
+                new(TokenType.NOTEQUAL, "!="),
+                new(TokenType.INT, "10"),
                 new(TokenType.SEMICOLON, ";"),
 
 
@@ -68,6 +114,11 @@ namespace Interpreter_cs.Monkey.Tests
 
             foreach (var token in tokens)
             {
+                if (token.Literal.Equals("=="))
+                {
+
+                }
+
                 var nextToken = lexer.nextToken();
                 token.Should().Be(nextToken);
             }
