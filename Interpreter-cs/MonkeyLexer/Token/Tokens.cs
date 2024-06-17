@@ -1,8 +1,7 @@
 ﻿
 namespace Interpreter_cs.MonkeyLexer.Token;
 
-public enum TokenType
-{
+public enum TokenType {
 
     //NOT ALLOWED
     ILLEGAL,
@@ -44,8 +43,7 @@ public enum TokenType
 
 }
 
-public readonly record struct Token(TokenType Type, string Literal)
-{
+public readonly record struct Token(TokenType Type, string Literal) {
 
     internal static Token Illegal = new(TokenType.ILLEGAL, "ILLEGAL");
     internal static Token EOF = new(TokenType.EOF, "\0");
@@ -79,7 +77,7 @@ public readonly record struct Token(TokenType Type, string Literal)
 
 }
 
-  
+
 
 
 
