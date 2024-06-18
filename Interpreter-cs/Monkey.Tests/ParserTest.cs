@@ -15,7 +15,7 @@ public class ParserTest {
     string input = """
         let x = 5;
         let y = 2;
-        let z = 3;
+        let z = 2;
         """;
 
     [Fact]
@@ -24,6 +24,7 @@ public class ParserTest {
         Parser parser = new Parser(lex);
 
         var p = parser.parseProgram(new Prog());
+        checkParserErrors(parser);
 
         if (p.statements == null) {
             throw new Exception("Parse program returned null");
@@ -60,5 +61,51 @@ public class ParserTest {
         return true;
     }
 
+    [Fact]
+    public void testReturnStatements() {
 
+        string input = @"
+                return 5;
+                return 10;
+                return 993322;
+            ";
+
+        Lexer lex = new Lexer(input);
+        Parser p = new Parser(lex);
+
+        var program = p.parseProgram(new Prog());
+
+        checkParserErrors(p);
+
+        if (program.statements.Count != 3) {
+            throw new Exception();
+        }
+
+        for(int i = 0; i < program.statements.Count; i++) {
+
+            if(program.statements[i] is not ReturnStatement returns) {
+                Assert.IsTrue(false, "not return statement");
+            }
+            var returnStatement = program.statements[i] as ReturnStatement;
+            returnStatement.token.Literal.Should().Be("return");
+                
+        }
+
+
+    }
+
+
+    public void checkParserErrors(Parser parser) {
+        var errors = parser.Error();
+
+        if(errors.Count == 0) {
+            return;
+        }
+        int i = 0;
+        foreach (var error in errors) {
+            Assert.IsTrue(false, "parser error"+error);
+            i++;
+        }
+
+    }
 }

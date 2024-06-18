@@ -36,6 +36,18 @@ internal class LetStatement(Token token) : Statement {
     }
 }
 
+internal class ReturnStatement(Token token) : Statement {
+
+    internal Token token = token;
+    internal Expression value;
+
+    Token Node.token { get => token; set => throw new NotImplementedException(); } 
+
+    string TokenLiteral() {
+        return token.Literal;
+    }
+}
+
 class Identifier(Token token, string ident) {
 
     internal Token token = token;
