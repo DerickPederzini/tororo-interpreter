@@ -15,10 +15,25 @@ public class Prog {
             return "";
         }
     }
-}
+
+    public string toString() {
+
+        string outString = "";
+
+        for (int i = 0; i < statements.Count; i++){
+            Console.Write(statements[i].token.ToString());
+            outString += statements[i].toString();
+        }
+        
+        return outString;
+    }
+}   
 
 public interface Node {
     Token token { get; set; }
+    string TokenLiteral();
+
+    string toString();
 }
 
 public interface Expression : Node { }
@@ -27,11 +42,26 @@ internal class LetStatement(Token token) : Statement {
 
     internal Token token = token;
     internal Identifier name;
-    internal Expression value;
+    internal Identifier value;
 
     Token Node.token { get => token; set => throw new NotImplementedException(); }
 
-    string TokenLiteral() {
+    public string toString() {
+
+        string outString = "";
+
+        outString = token.Literal + " " + name.identValue + " = ";
+
+        if(value != null) {
+            outString += (value.identValue);
+        }
+
+        outString += ";";
+
+        return outString;
+    }
+
+    public string TokenLiteral() {
         return token.Literal;
     }
 }
@@ -41,9 +71,43 @@ internal class ReturnStatement(Token token) : Statement {
     internal Token token = token;
     internal Expression value;
 
-    Token Node.token { get => token; set => throw new NotImplementedException(); } 
+    Token Node.token { get => token; set => throw new NotImplementedException(); }
 
-    string TokenLiteral() {
+    public string toString() {
+        string outString = "";
+
+        outString = token.Literal + " ";
+
+        if(value != null) {
+            outString += (value.ToString());
+        }
+
+        outString += ";";
+
+        return outString;
+    }
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+}
+
+internal class ExpressionStatement(Token token) : Expression {
+    internal Token token = token;
+    Expression expression;
+
+    Token Node.token { get => token ; set => throw new NotImplementedException(); }
+
+    public string toString() {
+        
+        if(expression != null) {
+            return expression.toString();
+        }
+        return "";
+
+    }
+
+    public string TokenLiteral() {
         return token.Literal;
     }
 }
@@ -54,7 +118,7 @@ class Identifier(Token token, string ident) {
     internal string identValue = ident;
 
     string TokenLiteral() {
-        return token.Literal;
+        return identValue;
     }
 
 }
