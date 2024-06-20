@@ -11,6 +11,8 @@ public class Parser {
     Token currentToken;
     Token nextToken;
     ArrayList errors;
+    Dictionary<TokenType, infixParse> infixParses;
+    Dictionary<TokenType, prefixParse> prefixParses;
 
     public Parser(Lexer lex) {
         lexer = lex;
@@ -73,13 +75,27 @@ public class Parser {
     }
 
     public Statement parseReturnStatement() {
-    
+
         ReturnStatement returnStatement = new ReturnStatement(currentToken);
 
         while (!currentTokenIs(TokenType.SEMICOLON)) {
             nextTk();
         }
         return returnStatement;
+    }
+
+
+    public delegate Expression prefixParse();
+   //delegate allows me to pass a reference to this function as a value to other methods;
+
+    public delegate Expression infixParse(Expression expression);
+  
+    public void registerPrefix(TokenType type, prefixParse prefix) {
+        prefixParses.Add(type, prefix);
+    }
+
+    public void regiterInfix(TokenType type, infixParse infix) {
+        infixParses.Add(type, infix);
     }
 
     public bool expectedPeek(TokenType type) {
