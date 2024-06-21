@@ -92,9 +92,9 @@ internal class ReturnStatement(Token token) : Statement {
     }
 }
 
-internal class ExpressionStatement(Token token) : Expression {
+internal class ExpressionStatement(Token token) : Expression, Statement {
     internal Token token = token;
-    Expression expression;
+    internal Expression expression;
 
     Token Node.token { get => token ; set => throw new NotImplementedException(); }
 
@@ -112,13 +112,19 @@ internal class ExpressionStatement(Token token) : Expression {
     }
 }
 
-class Identifier(Token token, string ident) {
+class Identifier(Token token, string ident) : Expression {
 
     internal Token token = token;
     internal string identValue = ident;
 
-    string TokenLiteral() {
+    Token Node.token { get => token ; set => throw new NotImplementedException(); }
+
+    string Node.TokenLiteral() {
         return identValue;
+    }
+
+    string Node.toString() {
+        return "Token: "+token+" Ident: "+identValue; 
     }
 
 }

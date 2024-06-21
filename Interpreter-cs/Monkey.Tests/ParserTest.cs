@@ -4,7 +4,9 @@ using FluentAssertions.Equivalency.Tracing;
 using Interpreter_cs.MonkeyAST;
 using Interpreter_cs.MonkeyLexer.Token;
 using Interpreter_cs.MonkeyParser;
+using System.CodeDom.Compiler;
 using System.Collections;
+using System.Security.Principal;
 using Xunit;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -91,6 +93,40 @@ public class ParserTest {
                 
         }
 
+
+    }
+
+    [Fact]
+    public void TestIdentifierExpression() {
+        string input = "foobar ";
+
+        Lexer lex = new Lexer(input);
+        Parser p = new Parser(lex);
+        Prog program = p.parseProgram(new Prog());
+
+        checkParserErrors(p); 
+
+        if (program.statements.Count != 1) {
+            Assert.IsTrue(false, $"Program does not have enough statements, found {program.statements.Count}");
+        }
+
+        var statement = program.statements[0] as ExpressionStatement;
+
+        if (statement is not ExpressionStatement express) {
+            Assert.IsTrue(false, $"program.statements[0] is not a expressionStatement, got {program.statements.GetType}");
+        }
+
+        var ident = statement.expression as Identifier;
+
+        ident.Should().NotBeNull("Ident is null");
+
+        if(ident is not Expression) {
+            Assert.IsTrue(false, $"ident is not a statement, got {ident.GetType}");
+        }
+
+        ident.identValue.Should().Be("foobar");
+
+        ident.token.Literal.Should().Be("foobar");
 
     }
 

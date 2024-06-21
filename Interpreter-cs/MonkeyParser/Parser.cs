@@ -1,7 +1,10 @@
 ﻿
 using Interpreter_cs.MonkeyAST;
 using Interpreter_cs.MonkeyLexer.Token;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections;
+using static Interpreter_cs.MonkeyParser.Parser;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Interpreter_cs.MonkeyParser;
@@ -12,13 +15,29 @@ public class Parser {
     Token nextToken;
     ArrayList errors;
     Dictionary<TokenType, infixParse> infixParses;
-    Dictionary<TokenType, prefixParse> prefixParses;
+    Dictionary<TokenType, prefixParse> prefixParses = new Dictionary<TokenType, prefixParse>();
 
     public Parser(Lexer lex) {
         lexer = lex;
         errors = new ArrayList();
         nextTk();
         nextTk();
+        
+        registerPrefix(TokenType.IDENT, parseIdentifier);
+    }
+
+    //precedences
+
+    enum Precedences { 
+        
+        LOWEST = 1, //1
+        EQUAL, //2
+        LESSGREATER, //3
+        SUM, //4
+        PRODUCT, //5
+        PREFIX, //6
+        CALL, //function //7
+
     }
 
     public void nextTk() {
@@ -34,11 +53,16 @@ public class Parser {
             if (statement != null) {
                 p.statements.Add(statement);
             }
+
             nextTk();
         }
 
         return p;
 
+    }
+
+    private Expression parseIdentifier() {
+        return new Identifier(currentToken, currentToken.Literal);
     }
 
     public Statement parseStatement() {
@@ -49,7 +73,7 @@ public class Parser {
             case TokenType.RETURN:
                 return parseReturnStatement();
             default:
-                return null;
+                return parseExpressionStatement();
         }
 
     }
@@ -96,6 +120,33 @@ public class Parser {
 
     public void regiterInfix(TokenType type, infixParse infix) {
         infixParses.Add(type, infix);
+    }
+
+    private ExpressionStatement parseExpressionStatement() {
+
+        var statement = new ExpressionStatement(currentToken);
+
+        statement.expression = parseExpression(((int)Precedences.LOWEST));
+
+        if (nextTokenIs(TokenType.SEMICOLON)) {
+            nextTk();
+        }
+
+        return statement;
+    
+    }
+
+    private Expression parseExpression(int precedence) {
+
+        var prefix = prefixParses[currentToken.Type];
+
+        if (prefix == null) {
+            return null;
+        }
+
+        var leftExpression = prefix();
+
+        return leftExpression;
     }
 
     public bool expectedPeek(TokenType type) {

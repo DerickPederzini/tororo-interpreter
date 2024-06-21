@@ -4,5 +4,12 @@ using Interpreter_cs.MonkeyREPL;
 
 Repl repl = new Repl();
 Console.WriteLine("This is the Monkey programming language!");
-Console.WriteLine("Feel free to try and type commands in!");    
+Console.WriteLine("Feel free to try and type commands in!");
+
 repl.startReader();
+enum e {
+    LOWEST = 1,
+    HIGH,
+}
+
+
