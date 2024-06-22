@@ -14,14 +14,16 @@ using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 namespace Interpreter_cs.Monkey.Tests;
 
 public class ParserTest {
+
+    [Fact]
+    public void testLetStatements() {
+
     string input = """
         let x = 5;
         let y = 2;
         let z = 2;
         """;
 
-    [Fact]
-    public void testLetStatements() {
         Lexer lex = new Lexer(input);
         Parser parser = new Parser(lex);
 
@@ -31,7 +33,7 @@ public class ParserTest {
         if (p.statements == null) {
             throw new Exception("Parse program returned null");
         }
-        if (p.statements.Count != 3) {
+        if (p.statements.Count != 6) {
             throw new Exception("Program does not have 3 statements");
         }
 
@@ -41,15 +43,20 @@ public class ParserTest {
             "y",
             "z",
         };
+        var j = 0;
 
         for (int i = 0; i < tests.Length; i++) {
             Statement s = p.statements[i];
-            testLetStatement(s, tests[i]).Should().BeTrue();
+            if(s.TokenLiteral() == "let") {
+                testLetStatement(s, tests[j]).Should().BeTrue();
+                j++;
+            }
         }
 
     }
 
     public bool testLetStatement(Statement statementDone, string expected) {
+
         statementDone.token.Literal.Should().Be("let", "statement.TokenLiteral should be 'let' ");
 
         if (statementDone is not LetStatement letStatement) {
@@ -128,6 +135,42 @@ public class ParserTest {
 
         ident.token.Literal.Should().Be("foobar");
 
+    }
+
+    [Fact]
+    public void testIntegerLiteralExpression() {
+
+        string input = "5;";
+
+        Lexer lex = new Lexer(input);
+        Parser p = new Parser(lex);
+        Prog program = p.parseProgram(new Prog());
+
+        checkParserErrors(p);
+
+        if (program.statements.Count != 1) {
+            Assert.IsTrue(false, $"Program does have correct amount of expression statement, got {program.statements.Count}");
+        }
+
+        var expression = program.statements[0] as ExpressionStatement;
+
+        expression.Should().NotBeNull("Expression is null");
+
+        if (expression is not ExpressionStatement) {
+            Assert.IsTrue(false, "Expression is not a expression statement");
+        }
+
+        var literal = expression.expression as IntegerLiteral;
+
+        literal.Should().NotBeNull("Literal is null");
+
+        if(literal.value != 5) {
+            Assert.IsTrue(false, $"Literal value does not equal 5, got {literal.value}");
+        }
+
+        if(literal.TokenLiteral() != "5") {
+            Assert.IsTrue(false, $"Literal token literal value does not equal '5', got {literal.TokenLiteral()}");
+        }
     }
 
 

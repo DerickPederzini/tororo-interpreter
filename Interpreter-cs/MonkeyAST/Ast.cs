@@ -128,3 +128,18 @@ class Identifier(Token token, string ident) : Expression {
     }
 
 }
+
+class IntegerLiteral(Token token) : Expression{
+    internal Token token = token;
+    internal long value;
+
+    Token Node.token { get => token; set => throw new NotImplementedException(); }
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+
+    public string toString() {
+        return "Current token: " + token.Type+" "+ token.Literal + " , current value: "+value;
+    }
+}

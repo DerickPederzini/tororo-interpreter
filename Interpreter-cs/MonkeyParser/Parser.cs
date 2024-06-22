@@ -24,6 +24,8 @@ public class Parser {
         nextTk();
         
         registerPrefix(TokenType.IDENT, parseIdentifier);
+        registerPrefix(TokenType.INT, parseIntegerLiteral);
+
     }
 
     //precedences
@@ -121,7 +123,7 @@ public class Parser {
     public void regiterInfix(TokenType type, infixParse infix) {
         infixParses.Add(type, infix);
     }
-
+    
     private ExpressionStatement parseExpressionStatement() {
 
         var statement = new ExpressionStatement(currentToken);
@@ -144,9 +146,25 @@ public class Parser {
             return null;
         }
 
+        //this line is so fucking cool holy shit
         var leftExpression = prefix();
 
         return leftExpression;
+    }
+
+    private Expression parseIntegerLiteral() {
+
+        try {
+            var literal = new IntegerLiteral(token: currentToken);
+            long value = long.Parse(literal.token.Literal);
+            literal.value = value;
+            return literal;
+        }
+        catch (Exception e) {
+            Assert.IsTrue(false, "Could not parse token value as a long ");
+            errors.Add(e);
+            return null;
+        }
     }
 
     public bool expectedPeek(TokenType type) {
