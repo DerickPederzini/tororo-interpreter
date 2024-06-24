@@ -6,6 +6,7 @@ using Interpreter_cs.MonkeyLexer.Token;
 using Interpreter_cs.MonkeyParser;
 using System.CodeDom.Compiler;
 using System.Collections;
+using System.Net.WebSockets;
 using System.Security.Principal;
 using Xunit;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
@@ -140,7 +141,7 @@ public class ParserTest {
     [Fact]
     public void testIntegerLiteralExpression() {
 
-        string input = "5;";
+        string input = "5";
 
         Lexer lex = new Lexer(input);
         Parser p = new Parser(lex);
@@ -171,6 +172,74 @@ public class ParserTest {
         if(literal.TokenLiteral() != "5") {
             Assert.IsTrue(false, $"Literal token literal value does not equal '5', got {literal.TokenLiteral()}");
         }
+    }
+
+    struct testPrefix(string input, string operation, long value) 
+    {
+        internal string input = input;
+        internal string operation = operation;
+        internal long value = value;
+    };
+
+    [Fact]
+    public void testParsingPrefixExpressions() {
+
+        testPrefix[] inputs = {
+            new testPrefix("!5", "!", 5),
+            new testPrefix("-15", "-", 15)
+        };
+
+        foreach (testPrefix test in inputs) {
+
+        Lexer lex = new Lexer(test.input);
+        Lexer lexer = lex.makeLexer(test.input);
+        Parser p = new Parser(lexer);
+        Prog program = p.parseProgram(new Prog());
+
+        checkParserErrors(p);
+
+        if (program.statements.Count != 1) {
+            Assert.IsTrue(false, $"Program does not have one statement, instead got {program.statements.Count}");
+        }
+
+        var statement = program.statements[0] as ExpressionStatement;
+
+        if (statement is not ExpressionStatement) {
+            Assert.IsTrue(false, "statement is not a expression statement, it is a "+statement.GetType());
+        }
+
+        var expression = statement.expression as PrefixExpression;
+        
+        if(expression is not PrefixExpression) {
+            Assert.IsTrue(false, $"expression is not a Expression Statement, it is a {expression.GetType()}");
+        }
+
+        if (expression.operators != test.operation) {
+            Assert.IsTrue(false, "Expression operator is not expected");
+        }
+
+        if (!testIntegerLiteral(expression.right, test.value)) {
+            return;
+        }
+
+        }
+    }
+
+    public bool testIntegerLiteral(Expression exp, long value) {
+
+        var integ = exp as IntegerLiteral;
+
+        if (integ.value != value) {
+            Assert.IsTrue(false, $"Token Literal does not correspond {value}, instead got {integ.value}");
+            return false;
+        }
+
+        if (integ.token.Literal != value.ToString()) {
+            Assert.IsTrue(false, $"Token Literal does not correspond {value.ToString()}, instead got {integ.token.Literal}");
+            return false;
+        }
+
+        return true;
     }
 
 

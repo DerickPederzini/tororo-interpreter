@@ -143,3 +143,20 @@ class IntegerLiteral(Token token) : Expression{
         return "Current token: " + token.Type+" "+ token.Literal + " , current value: "+value;
     }
 }
+
+class PrefixExpression(Token token) : Expression {
+
+    internal Token token = token;
+    internal string operators;
+    internal Expression right;
+
+    Token Node.token { get => token; set => throw new NotImplementedException(); }
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+
+    public string toString() {
+        return $"( {operators}, {right.toString()} )";
+    }
+}

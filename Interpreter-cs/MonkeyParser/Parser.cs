@@ -25,20 +25,22 @@ public class Parser {
         
         registerPrefix(TokenType.IDENT, parseIdentifier);
         registerPrefix(TokenType.INT, parseIntegerLiteral);
+        registerPrefix(TokenType.NOT, parsePrefixExpression);
+        registerPrefix(TokenType.MINUS, parsePrefixExpression);
+        registerPrefix(TokenType.SEMICOLON, parseIdentifier);
 
     }
-
     //precedences
 
     enum Precedences { 
         
         LOWEST = 1, //1
-        EQUAL, //2
-        LESSGREATER, //3
-        SUM, //4
-        PRODUCT, //5
-        PREFIX, //6
-        CALL, //function //7
+        EQUAL = 2, //2
+        LESSGREATER = 3, //3
+        SUM = 4, //4
+        PRODUCT = 5, //5
+        PREFIX = 6, //6
+        CALL = 7, //function //7
 
     }
 
@@ -123,7 +125,7 @@ public class Parser {
     public void regiterInfix(TokenType type, infixParse infix) {
         infixParses.Add(type, infix);
     }
-    
+
     private ExpressionStatement parseExpressionStatement() {
 
         var statement = new ExpressionStatement(currentToken);
@@ -143,6 +145,7 @@ public class Parser {
         var prefix = prefixParses[currentToken.Type];
 
         if (prefix == null) {
+            noPrefixParseFnError(currentToken.Type);
             return null;
         }
 
@@ -165,6 +168,22 @@ public class Parser {
             errors.Add(e);
             return null;
         }
+    }
+
+    public void noPrefixParseFnError(TokenType token) {
+        Assert.IsTrue(false, "No prefix parse function");
+        errors.Add(token);
+    }
+
+    private Expression parsePrefixExpression() {
+        var exp = new PrefixExpression(currentToken);
+        exp.operators = currentToken.Literal;
+
+        nextTk();   
+
+        exp.right = parseExpression(precedence: (((int)Precedences.PREFIX)));
+
+        return exp;
     }
 
     public bool expectedPeek(TokenType type) {

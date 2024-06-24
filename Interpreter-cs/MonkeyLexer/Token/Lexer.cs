@@ -7,36 +7,29 @@ using System.Threading.Tasks;
 
 namespace Interpreter_cs.MonkeyLexer.Token;
 
-public class Lexer(string input)
+public class Lexer
 {
-    string input = input;//as a whole
+    string input;//as a whole
     int position;// points to current character
     int readPosition; //points to after the current character
-    char currentCharacter = input[0];
+    char currentCharacter;
 
-    //creating the lexer
-    public Lexer makeLexer(string input)
-    {
-        var lex = new Lexer(input);
-        lex.readCharacter();
-        return lex;
+    public Lexer(string input) {
+        this.input = input;
+        readCharacter();
     }
 
     public void readCharacter()
     {
-        if (readPosition >= input.Length)
-        {
+        if (readPosition >= input.Length) {
             currentCharacter = '\0';//ASCII code for Null
-            
+
         }
-        else
-        {
+        else {
             currentCharacter = input.ElementAt(readPosition);
-
-            position++;
-            readPosition = position + 1;
-
         }
+        position = readPosition;
+        readPosition++;
 
     }
 
@@ -94,7 +87,6 @@ public class Lexer(string input)
         else if (currentCharacter == '<')
             tokens = Token.LANGLE;
 
-        
         else if (currentCharacter == '=')
         {
             char charAfterCurrent = peakChar();
@@ -106,6 +98,7 @@ public class Lexer(string input)
             }
             else 
                 tokens = Token.ASSIGN;
+            
 
         }
         else if (currentCharacter == '!')
@@ -117,9 +110,10 @@ public class Lexer(string input)
                 tokens = Token.NOTEQUAL;
                 readCharacter();
             }
-                
-            else
+
+            else 
                 tokens = Token.NOT;
+            
         }
 
         else if (Char.IsLetter(currentCharacter))
