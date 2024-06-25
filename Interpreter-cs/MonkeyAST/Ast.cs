@@ -160,3 +160,21 @@ class PrefixExpression(Token token) : Expression {
         return $"( {operators}, {right.toString()} )";
     }
 }
+
+class InfixExpression(Token token) : Expression {
+
+    internal Token token = token;
+    internal Expression rightValue;
+    internal string operators;
+    internal Expression leftValue;
+
+    Token Node.token { get => token; set => throw new NotImplementedException(); }
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+
+    public string toString() {
+        throw new NotImplementedException();
+    }
+}

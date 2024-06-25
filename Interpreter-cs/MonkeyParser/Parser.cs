@@ -4,6 +4,7 @@ using Interpreter_cs.MonkeyLexer.Token;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
+using System.Security;
 using static Interpreter_cs.MonkeyParser.Parser;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -14,7 +15,7 @@ public class Parser {
     Token currentToken;
     Token nextToken;
     ArrayList errors;
-    Dictionary<TokenType, infixParse> infixParses;
+    Dictionary<TokenType, infixParse> infixParses = new Dictionary<TokenType, infixParse>();
     Dictionary<TokenType, prefixParse> prefixParses = new Dictionary<TokenType, prefixParse>();
 
     public Parser(Lexer lex) {
@@ -22,18 +23,26 @@ public class Parser {
         errors = new ArrayList();
         nextTk();
         nextTk();
-        
+
         registerPrefix(TokenType.IDENT, parseIdentifier);
         registerPrefix(TokenType.INT, parseIntegerLiteral);
         registerPrefix(TokenType.NOT, parsePrefixExpression);
         registerPrefix(TokenType.MINUS, parsePrefixExpression);
         registerPrefix(TokenType.SEMICOLON, parseIdentifier);
 
+        registerInfix(TokenType.EQUAL, parseInfixExpression);
+        registerInfix(TokenType.NOTEQUAL, parseInfixExpression);
+        registerInfix(TokenType.PLUS, parseInfixExpression);
+        registerInfix(TokenType.MINUS, parseInfixExpression);
+        registerInfix(TokenType.MULTIPLY, parseInfixExpression);
+        registerInfix(TokenType.SLASH, parseInfixExpression);
+        registerInfix(TokenType.LANGLE, parseInfixExpression);
+        registerInfix(TokenType.RANGLE, parseInfixExpression);
+
     }
     //precedences
+    enum Precedences {
 
-    enum Precedences { 
-        
         LOWEST = 1, //1
         EQUAL = 2, //2
         LESSGREATER = 3, //3
@@ -44,9 +53,37 @@ public class Parser {
 
     }
 
+    Dictionary<TokenType, Precedences> precendence = new Dictionary<TokenType, Precedences>() 
+    {
+        { TokenType.EQUAL, Precedences.EQUAL },
+        { TokenType.NOTEQUAL, Precedences.EQUAL },
+        { TokenType.PLUS, Precedences.SUM },
+        { TokenType.MINUS, Precedences.SUM },
+        { TokenType.MULTIPLY, Precedences.PRODUCT },
+        { TokenType.SLASH, Precedences.PRODUCT },
+        { TokenType.LANGLE, Precedences.LESSGREATER },
+        { TokenType.RANGLE, Precedences.LESSGREATER },
+    };
+
     public void nextTk() {
         currentToken = nextToken;
         nextToken = lexer.nextToken();
+    }
+
+    public int peekPrecendence() {
+        var prec = precendence[nextToken.Type];
+        if(prec != null) {
+            return (int)prec;
+        }
+        return (int)Precedences.LOWEST;
+    }
+
+    public int currentPrecedence() {
+        var prec = precendence[currentToken.Type];
+        if(prec != null) {
+            return (int)prec;
+        }
+        return (int)Precedences.LOWEST;
     }
 
     public Prog parseProgram(Prog p) {
@@ -122,7 +159,7 @@ public class Parser {
         prefixParses.Add(type, prefix);
     }
 
-    public void regiterInfix(TokenType type, infixParse infix) {
+    public void registerInfix(TokenType type, infixParse infix) {
         infixParses.Add(type, infix);
     }
 
@@ -141,16 +178,24 @@ public class Parser {
     }
 
     private Expression parseExpression(int precedence) {
-
         var prefix = prefixParses[currentToken.Type];
 
         if (prefix == null) {
             noPrefixParseFnError(currentToken.Type);
             return null;
         }
-
-        //this line is so fucking cool holy shit
         var leftExpression = prefix();
+
+        if (!nextTokenIs(TokenType.SEMICOLON) && peekPrecendence() > precedence) {
+            var infix = infixParses[nextToken.Type];
+
+            if (infix == null) {
+                return leftExpression;
+            }
+
+            nextTk();   
+            leftExpression = infix(leftExpression);
+        }
 
         return leftExpression;
     }
@@ -182,6 +227,22 @@ public class Parser {
         nextTk();   
 
         exp.right = parseExpression(precedence: (((int)Precedences.PREFIX)));
+
+        return exp;
+    }
+
+    private Expression parseInfixExpression(Expression left) {
+
+        var exp = new InfixExpression(currentToken) {
+            operators = currentToken.Literal,
+            leftValue = left
+        };
+
+        int prec = currentPrecedence();
+
+        nextTk();   
+
+        exp.rightValue = parseExpression(precedence: prec);
 
         return exp;
     }

@@ -192,8 +192,7 @@ public class ParserTest {
         foreach (testPrefix test in inputs) {
 
         Lexer lex = new Lexer(test.input);
-        Lexer lexer = lex.makeLexer(test.input);
-        Parser p = new Parser(lexer);
+        Parser p = new Parser(lex);
         Prog program = p.parseProgram(new Prog());
 
         checkParserErrors(p);
@@ -240,6 +239,68 @@ public class ParserTest {
         }
 
         return true;
+    }
+
+    struct testInfix(string input, long lValue, string operators, long rValue) {
+        internal string input = input;
+        internal long leftValue = lValue;
+        internal string operators = operators;
+        internal long rightValue = rValue;
+    }
+
+    [Fact]
+    public void testParsingInfixExpressions() {
+        testInfix[] infixTest = {
+            new testInfix("5 + 5;", 5, "+", 5),
+            new testInfix("5 - 5;", 5, "-", 5),
+            new testInfix("5 * 5;", 5, "*", 5),
+            new testInfix("5 / 5;", 5, "/", 5),
+            new testInfix("5 > 5;", 5, ">", 5),
+            new testInfix("5 < 5;", 5, "<", 5),
+            new testInfix("5 == 5;", 5, "==", 5),
+            new testInfix("5 != 5;", 5, "!=", 5),
+        };
+
+        foreach (var test in infixTest) {
+
+            Lexer lex = new Lexer(test.input);
+            Parser p = new Parser(lex);
+            Prog program = p.parseProgram(new Prog());
+
+            checkParserErrors(p);
+
+            program.Should().NotBeNull();
+
+            if(program.statements.Count != 1) {
+                Assert.IsTrue(false, $"Program statement count is not equal to 3, it is equal to {program.statements.Count}");
+            }
+
+            var statements = program.statements[0] as ExpressionStatement;
+
+            statements.Should().NotBeNull();
+
+            if (statements is not ExpressionStatement) {
+                Assert.IsTrue(false, "Statements types was expected to be an Expression statement, but instead got "+statements.GetType());
+            }
+
+            var expression = statements.expression as InfixExpression;
+
+            expression.Should().NotBeNull();
+
+            if (!testIntegerLiteral(expression.leftValue, test.leftValue)) {
+                Assert.IsTrue(false, $"Test Literal did not pass the test, expected {test.leftValue} and got {expression.leftValue}");
+            }
+
+            if (expression.operators != test.operators) {
+                Assert.IsTrue(false, $"Expression operators is not {test.operators}, it is {expression.operators} ");
+            }
+
+            if (!testIntegerLiteral(expression.rightValue, test.rightValue)) {
+                Assert.IsTrue(false, $"Test Literal did not pass the test, expected {test.rightValue} and got {expression.rightValue}");
+            }
+
+        }
+
     }
 
 
