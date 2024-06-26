@@ -73,7 +73,6 @@ public class ParserTest {
 
     [Fact]
     public void testReturnStatements() {
-
         string input = @"
                 return 5;
                 return 10;
@@ -97,11 +96,8 @@ public class ParserTest {
                 Assert.IsTrue(false, "not return statement");
             }
             var returnStatement = program.statements[i] as ReturnStatement;
-            returnStatement.token.Literal.Should().Be("return");
-                
+            returnStatement.token.Literal.Should().Be("return");   
         }
-
-
     }
 
     [Fact]
@@ -140,7 +136,6 @@ public class ParserTest {
 
     [Fact]
     public void testIntegerLiteralExpression() {
-
         string input = "5";
 
         Lexer lex = new Lexer(input);
@@ -183,7 +178,6 @@ public class ParserTest {
 
     [Fact]
     public void testParsingPrefixExpressions() {
-
         testPrefix[] inputs = {
             new testPrefix("!5", "!", 5),
             new testPrefix("-15", "-", 15)
@@ -220,12 +214,10 @@ public class ParserTest {
         if (!testIntegerLiteral(expression.right, test.value)) {
             return;
         }
-
         }
     }
 
     public bool testIntegerLiteral(Expression exp, long value) {
-
         var integ = exp as IntegerLiteral;
 
         if (integ.value != value) {
@@ -237,7 +229,6 @@ public class ParserTest {
             Assert.IsTrue(false, $"Token Literal does not correspond {value.ToString()}, instead got {integ.token.Literal}");
             return false;
         }
-
         return true;
     }
 
@@ -298,9 +289,43 @@ public class ParserTest {
             if (!testIntegerLiteral(expression.rightValue, test.rightValue)) {
                 Assert.IsTrue(false, $"Test Literal did not pass the test, expected {test.rightValue} and got {expression.rightValue}");
             }
-
         }
+    }
 
+    struct testOperatorPrecedense(string input, string expected) {
+
+        internal string input = input;
+        internal string expected = expected;
+
+    }
+
+    [Fact]
+    public void testOperatorPrecedenseParsing() {
+
+        testOperatorPrecedense [] tests = {
+            new testOperatorPrecedense("-a * b", "((-a) * b)"),
+            new testOperatorPrecedense("!-a", "(!(-a))"),
+            new testOperatorPrecedense("a + b + c", "((a + b) + c)"),
+            new testOperatorPrecedense("3 + 4 * 5 == 3 * 1 + 4* 5","((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+        };
+
+        foreach (var test in tests) {
+
+            Lexer lex = new Lexer(test.input);
+            Parser p = new Parser(lex);
+            Prog program = p.parseProgram(new Prog());
+
+            checkParserErrors(p);
+
+            var actual = program.toString();
+
+            actual.Should().NotBe(null);
+
+            //This pass does not test, i have to make some corrections in the toString() overrides!
+            if(actual != test.expected){
+                Assert.IsTrue(false, "Actual is not expected, expected "+test.expected+"  got "+actual);
+            }
+        }
     }
 
 
@@ -311,10 +336,10 @@ public class ParserTest {
             return;
         }
         int i = 0;
+
         foreach (var error in errors) {
             Assert.IsTrue(false, "parser error"+error);
             i++;
         }
-
     }
 }

@@ -21,11 +21,11 @@ public class Prog {
         string outString = "";
 
         for (int i = 0; i < statements.Count; i++){
-            Console.Write(statements[i].token.ToString());
+            Console.Write(statements[i].ToString());
             outString += statements[i].toString();
         }
         
-        return outString;
+        return outString.ToString();
     }
 }   
 
@@ -124,7 +124,7 @@ class Identifier(Token token, string ident) : Expression {
     }
 
     string Node.toString() {
-        return "Token: "+token+" Ident: "+identValue; 
+        return $"{identValue}"; 
     }
 
 }
@@ -140,7 +140,7 @@ class IntegerLiteral(Token token) : Expression{
     }
 
     public string toString() {
-        return "Current token: " + token.Type+" "+ token.Literal + " , current value: "+value;
+        return token.Literal;
     }
 }
 
@@ -157,7 +157,7 @@ class PrefixExpression(Token token) : Expression {
     }
 
     public string toString() {
-        return $"( {operators}, {right.toString()} )";
+        return $"({operators}{right.toString()})";
     }
 }
 
@@ -175,6 +175,6 @@ class InfixExpression(Token token) : Expression {
     }
 
     public string toString() {
-        throw new NotImplementedException();
+        return $"({leftValue.toString()} {operators} {rightValue.toString()})";
     }
 }

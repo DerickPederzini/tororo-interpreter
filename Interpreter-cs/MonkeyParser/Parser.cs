@@ -63,6 +63,7 @@ public class Parser {
         { TokenType.SLASH, Precedences.PRODUCT },
         { TokenType.LANGLE, Precedences.LESSGREATER },
         { TokenType.RANGLE, Precedences.LESSGREATER },
+        { TokenType.EOF, Precedences.LOWEST }
     };
 
     public void nextTk() {
@@ -71,7 +72,7 @@ public class Parser {
     }
 
     public int peekPrecendence() {
-        var prec = precendence[nextToken.Type];
+        int ? prec = (int)precendence[nextToken.Type];
         if(prec != null) {
             return (int)prec;
         }
@@ -186,7 +187,7 @@ public class Parser {
         }
         var leftExpression = prefix();
 
-        if (!nextTokenIs(TokenType.SEMICOLON) && peekPrecendence() > precedence) {
+        while (!nextTokenIs(TokenType.SEMICOLON) && peekPrecendence() > precedence) {
             var infix = infixParses[nextToken.Type];
 
             if (infix == null) {
