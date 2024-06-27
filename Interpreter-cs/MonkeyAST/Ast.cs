@@ -178,3 +178,19 @@ class InfixExpression(Token token) : Expression {
         return $"({leftValue.toString()} {operators} {rightValue.toString()})";
     }
 }
+
+class Bool(Token token, bool value) : Expression {
+
+    internal Token token = token;
+    internal bool value = value;
+
+    Token Node.token { get => token; set => throw new NotImplementedException(); }
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+
+    public string toString() {
+        return value.ToString().ToLower();
+    }
+}

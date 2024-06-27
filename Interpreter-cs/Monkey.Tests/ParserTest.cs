@@ -132,7 +132,41 @@ public class ParserTest {
 
         ident.token.Literal.Should().Be("foobar");
 
-    }
+    }  
+    [Fact]
+    public void TestBoolenExpression() {
+        string input = "true";
+
+        Lexer lex = new Lexer(input);
+        Parser p = new Parser(lex);
+        Prog program = p.parseProgram(new Prog());
+
+        checkParserErrors(p); 
+
+        if (program.statements.Count != 1) {
+            Assert.IsTrue(false, $"Program does not have enough statements, found {program.statements.Count}");
+        }
+
+        var statement = program.statements[0] as ExpressionStatement;
+
+        if (statement is not ExpressionStatement express) {
+            Assert.IsTrue(false, $"program.statements[0] is not a expressionStatement, got {program.statements.GetType}");
+        }
+
+        var ident = statement.expression as Bool;
+
+        ident.Should().NotBeNull("Ident is null");
+
+        if(ident is not Expression) {
+            Assert.IsTrue(false, $"ident is not a statement, got {ident.GetType}");
+        }
+
+        ident.value.Should().Be(true);
+
+        ident.token.Literal.Should().Be("true");
+
+    }  
+
 
     [Fact]
     public void testIntegerLiteralExpression() {
@@ -217,21 +251,6 @@ public class ParserTest {
         }
     }
 
-    public bool testIntegerLiteral(Expression exp, long value) {
-        var integ = exp as IntegerLiteral;
-
-        if (integ.value != value) {
-            Assert.IsTrue(false, $"Token Literal does not correspond {value}, instead got {integ.value}");
-            return false;
-        }
-
-        if (integ.token.Literal != value.ToString()) {
-            Assert.IsTrue(false, $"Token Literal does not correspond {value.ToString()}, instead got {integ.token.Literal}");
-            return false;
-        }
-        return true;
-    }
-
     struct testInfix(string input, long lValue, string operators, long rValue) {
         internal string input = input;
         internal long leftValue = lValue;
@@ -302,11 +321,15 @@ public class ParserTest {
     [Fact]
     public void testOperatorPrecedenseParsing() {
 
-        testOperatorPrecedense [] tests = {
+        testOperatorPrecedense[] tests = {
             new testOperatorPrecedense("-a * b", "((-a) * b)"),
             new testOperatorPrecedense("!-a", "(!(-a))"),
             new testOperatorPrecedense("a + b + c", "((a + b) + c)"),
-            new testOperatorPrecedense("3 + 4 * 5 == 3 * 1 + 4* 5","((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+            new testOperatorPrecedense("3 + 4 * 5 == 3 * 1 + 4 * 5","((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+            new testOperatorPrecedense("false", "false"),
+            new testOperatorPrecedense("3 > 5 == false", "((3 > 5) == false)"),
+            new testOperatorPrecedense("3 < 5 == true", "((3 < 5) == true)")
+
         };
 
         foreach (var test in tests) {
@@ -326,6 +349,46 @@ public class ParserTest {
                 Assert.IsTrue(false, "Actual is not expected, expected "+test.expected+"  got "+actual);
             }
         }
+    }
+    public bool testIntegerLiteral(Expression exp, long value) {
+        var integ = exp as IntegerLiteral;
+
+        if (integ.value != value) {
+            Assert.IsTrue(false, $"Token Literal does not correspond {value}, instead got {integ.value}");
+            return false;
+        }
+
+        if (integ.token.Literal != value.ToString()) {
+            Assert.IsTrue(false, $"Token Literal does not correspond {value.ToString()}, instead got {integ.token.Literal}");
+            return false;
+        }
+        return true;
+    }
+    public bool testIdentifier(Expression exp, string value) {
+
+        var ident = exp as Identifier;
+
+        ident.Should().NotBe(null, "Assertion should be an Identifier, but it is a "+ident.GetType());
+
+        ident.identValue.Should().Be(value, "Ident value should be "+value);
+
+        ident.token.Literal.Should().Be(value, "Ident Token Literal value should be "+value);
+            
+        return true;
+
+    }
+
+    public bool testBooleanExpression(Expression exp, bool value) {
+
+        var ident = exp as Bool;
+
+        ident.Should().NotBe(null);
+
+        ident.value.Should().Be(value);
+
+        ident.TokenLiteral().Should().Be(value.ToString());
+
+        return true;
     }
 
 

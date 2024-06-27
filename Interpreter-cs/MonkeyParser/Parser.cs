@@ -39,6 +39,9 @@ public class Parser {
         registerInfix(TokenType.LANGLE, parseInfixExpression);
         registerInfix(TokenType.RANGLE, parseInfixExpression);
 
+        registerPrefix(TokenType.TRUE, parseBoolean);
+        registerPrefix(TokenType.FALSE, parseBoolean);
+
     }
     //precedences
     enum Precedences {
@@ -193,7 +196,6 @@ public class Parser {
             if (infix == null) {
                 return leftExpression;
             }
-
             nextTk();   
             leftExpression = infix(leftExpression);
         }
@@ -246,6 +248,10 @@ public class Parser {
         exp.rightValue = parseExpression(precedence: prec);
 
         return exp;
+    }
+
+    private Expression parseBoolean() {
+        return new Bool(currentToken, currentTokenIs(TokenType.TRUE));
     }
 
     public bool expectedPeek(TokenType type) {
