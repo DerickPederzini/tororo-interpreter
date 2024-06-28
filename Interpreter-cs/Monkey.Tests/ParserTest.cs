@@ -194,32 +194,30 @@ public class ParserTest {
 
         literal.Should().NotBeNull("Literal is null");
 
-        if(literal.value != 5) {
-            Assert.IsTrue(false, $"Literal value does not equal 5, got {literal.value}");
-        }
+        testLiteralExpression(literal, int.Parse(input));
 
-        if(literal.TokenLiteral() != "5") {
-            Assert.IsTrue(false, $"Literal token literal value does not equal '5', got {literal.TokenLiteral()}");
-        }
     }
 
-    struct testPrefix(string input, string operation, long value) 
+    struct testPrefx(string input, string operation, long value) 
     {
         internal string input = input;
         internal string operation = operation;
         internal long value = value;
     };
 
-    [Fact]
-    public void testParsingPrefixExpressions() {
-        testPrefix[] inputs = {
-            new testPrefix("!5", "!", 5),
-            new testPrefix("-15", "-", 15)
-        };
+    public static IEnumerable<object[]> testPrefix() {
+        yield return new object[] { "!5;", "!", 5 };
+        yield return new object[] { "-15;", "-", 15 };
+        yield return new object[] { "!true;", "!", true };
+        yield return new object[] { "!false;", "!", false };
+    }
 
-        foreach (testPrefix test in inputs) {
+    
+    [Theory]
+    [MemberData(nameof(testPrefix))]
+    public void testParsingPrefixExpressions(string input, string operation, object value) {
 
-        Lexer lex = new Lexer(test.input);
+        Lexer lex = new Lexer(input);
         Parser p = new Parser(lex);
         Prog program = p.parseProgram(new Prog());
 
@@ -241,14 +239,14 @@ public class ParserTest {
             Assert.IsTrue(false, $"expression is not a Expression Statement, it is a {expression.GetType()}");
         }
 
-        if (expression.operators != test.operation) {
+        if (expression.operators != operation) {
             Assert.IsTrue(false, "Expression operator is not expected");
         }
 
-        if (!testIntegerLiteral(expression.right, test.value)) {
+        if (!testLiteralExpression(expression.right, value)) {
             return;
         }
-        }
+        
     }
 
     struct testInfix(string input, long lValue, string operators, long rValue) {
@@ -297,18 +295,16 @@ public class ParserTest {
 
             expression.Should().NotBeNull();
 
-            if (!testIntegerLiteral(expression.leftValue, test.leftValue)) {
-                Assert.IsTrue(false, $"Test Literal did not pass the test, expected {test.leftValue} and got {expression.leftValue}");
+            testInfixExpression(expression, test.leftValue, test.operators, test.rightValue);
+
+            if (!testLiteralExpression(expression.leftValue, test.leftValue)) {
+                return;
             }
 
-            if (expression.operators != test.operators) {
-                Assert.IsTrue(false, $"Expression operators is not {test.operators}, it is {expression.operators} ");
+            if (!testLiteralExpression(expression.rightValue, test.rightValue)) {
+                return;
             }
-
-            if (!testIntegerLiteral(expression.rightValue, test.rightValue)) {
-                Assert.IsTrue(false, $"Test Literal did not pass the test, expected {test.rightValue} and got {expression.rightValue}");
-            }
-        }
+        }   
     }
 
     struct testOperatorPrecedense(string input, string expected) {
@@ -378,17 +374,57 @@ public class ParserTest {
 
     }
 
-    public bool testBooleanExpression(Expression exp, bool value) {
+    public bool testBooleanLiteral(Expression exp, bool value) {
 
         var ident = exp as Bool;
 
         ident.Should().NotBe(null);
 
-        ident.value.Should().Be(value);
+        if (ident.value != value) {
+            Assert.IsTrue(false, "Ident value is not value, got"+ident.value);
+            return false;
+        }
 
-        ident.TokenLiteral().Should().Be(value.ToString());
+        ident.token.Literal.Should().Be(value.ToString().ToLower());
 
         return true;
+    }
+
+    public bool testLiteralExpression(Expression exp, object expected) {
+
+        switch (expected) {
+            case int value:
+                return testIntegerLiteral(exp, value);
+            case long value:
+                return testIntegerLiteral(exp, value);
+            case string value:
+                return testIdentifier(exp, value);
+            case bool value:
+                return testBooleanLiteral(exp, value);
+        }
+        Assert.IsTrue(false, "Type of exp not handled");
+        return false;
+    }
+
+    public bool testInfixExpression(Expression exp, object left, string operators, object right) {
+            
+        var opExp = exp as InfixExpression;
+
+        opExp.Should().NotBeNull();
+
+        if (!testLiteralExpression(opExp.leftValue, left)) { 
+            return false; 
+        }
+
+        if (opExp.operators != operators) {
+            return false;
+        }
+        if (!testLiteralExpression(opExp.leftValue, left)) {
+            return false;
+        }
+
+        return true;
+
     }
 
 
