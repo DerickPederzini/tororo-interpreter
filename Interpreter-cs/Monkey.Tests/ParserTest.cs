@@ -392,7 +392,7 @@ public class ParserTest {
 
     }
 
-    
+    [Fact]
     public void testIfElseExpression() {
         string input = "if (x > y) { x } else { y }";
         Lexer lex = new Lexer(input);

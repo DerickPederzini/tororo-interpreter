@@ -255,17 +255,25 @@ public class Parser {
         if (!expectedPeek(TokenType.RPAREN)) {
             return null;
         }
-        
         if (!expectedPeek(TokenType.LBRACE)) {
             return null;
         }
+        exp.consequence = parseBlockStatement();
 
-        exp.consequence = parseBlockStatement((int)Precedences.LOWEST);
+        if (nextTokenIs(TokenType.ELSE)) {
+            nextTk();
+
+            if (!expectedPeek(TokenType.LBRACE)) {
+                return null;
+            }
+            nextTk();
+            exp.alternative = parseBlockStatement();
+        }
 
         return exp;
     }
 
-    private BlockStatement parseBlockStatement(int precedence) {
+    private BlockStatement parseBlockStatement() {
         var blockStmt = new BlockStatement(currentToken);
         blockStmt.statements = new List<Statement>();
         nextTk();
@@ -281,7 +289,7 @@ public class Parser {
     }
 
     public bool expectedPeek(TokenType type) {
-        if (nextToken.Type == type) {
+        if (nextTokenIs(type)) {
             nextTk();
             return true;
         }
