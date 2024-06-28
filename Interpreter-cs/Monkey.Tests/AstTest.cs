@@ -21,8 +21,8 @@ namespace Interpreter_cs.Monkey.Tests {
                 }
             };
             
-            if(program.toString() != "let myVar = anotherVar;") {
-                Assert.IsTrue(false, "error, program.toString() is wrong! "+ program.toString());
+            if(program.ToString() != "let myVar = anotherVar;") {
+                Assert.IsTrue(false, "error, program.toString() is wrong! "+ program.ToString());
             }
 
         }

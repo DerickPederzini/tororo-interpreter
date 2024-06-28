@@ -1,9 +1,11 @@
 ﻿
+using FluentAssertions;
 using Interpreter_cs.MonkeyAST;
 using Interpreter_cs.MonkeyLexer.Token;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
+using System.Data;
 using System.Security;
 using static Interpreter_cs.MonkeyParser.Parser;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
@@ -42,10 +44,13 @@ public class Parser {
         registerPrefix(TokenType.TRUE, parseBoolean);
         registerPrefix(TokenType.FALSE, parseBoolean);
 
+        registerPrefix(TokenType.LPAREN, parseGroupedExpression);
+
+        registerPrefix(TokenType.IF, parseIfExpression);
+        registerPrefix(TokenType.ELSE, parseIfExpression);
     }
     //precedences
     enum Precedences {
-
         LOWEST = 1, //1
         EQUAL = 2, //2
         LESSGREATER = 3, //3
@@ -53,7 +58,6 @@ public class Parser {
         PRODUCT = 5, //5
         PREFIX = 6, //6
         CALL = 7, //function //7
-
     }
 
     Dictionary<TokenType, Precedences> precendence = new Dictionary<TokenType, Precedences>() 
@@ -66,7 +70,6 @@ public class Parser {
         { TokenType.SLASH, Precedences.PRODUCT },
         { TokenType.LANGLE, Precedences.LESSGREATER },
         { TokenType.RANGLE, Precedences.LESSGREATER },
-        { TokenType.EOF, Precedences.LOWEST }
     };
 
     public void nextTk() {
@@ -75,35 +78,28 @@ public class Parser {
     }
 
     public int peekPrecendence() {
-        int ? prec = (int)precendence[nextToken.Type];
-        if(prec != null) {
+        if(precendence.TryGetValue(nextToken.Type, out Precedences prec)) {
             return (int)prec;
         }
         return (int)Precedences.LOWEST;
     }
 
     public int currentPrecedence() {
-        var prec = precendence[currentToken.Type];
-        if(prec != null) {
+        if(precendence.TryGetValue(currentToken.Type, out Precedences prec)) {
             return (int)prec;
         }
         return (int)Precedences.LOWEST;
     }
 
     public Prog parseProgram(Prog p) {
-
         while (!currentTokenIs(TokenType.EOF)) {
-
             var statement = parseStatement();
             if (statement != null) {
                 p.statements.Add(statement);
             }
-
             nextTk();
         }
-
         return p;
-
     }
 
     private Expression parseIdentifier() {
@@ -111,7 +107,6 @@ public class Parser {
     }
 
     public Statement parseStatement() {
-
         switch (currentToken.Type) {
             case TokenType.LET:
                 return parseLetStatement();
@@ -120,7 +115,6 @@ public class Parser {
             default:
                 return parseExpressionStatement();
         }
-
     }
 
     public Statement parseLetStatement() {
@@ -129,22 +123,18 @@ public class Parser {
         if (!expectedPeek(TokenType.IDENT)) {
             return null;
         }
-
         statement.name = new Identifier(currentToken, currentToken.Literal);
 
         if (!expectedPeek(TokenType.ASSIGN)) {
             return null;
         }
-
         while (currentTokenIs(TokenType.SEMICOLON)) {
             nextTk();
         }
         return statement;
-
     }
 
     public Statement parseReturnStatement() {
-
         ReturnStatement returnStatement = new ReturnStatement(currentToken);
 
         while (!currentTokenIs(TokenType.SEMICOLON)) {
@@ -168,17 +158,13 @@ public class Parser {
     }
 
     private ExpressionStatement parseExpressionStatement() {
-
         var statement = new ExpressionStatement(currentToken);
-
         statement.expression = parseExpression(((int)Precedences.LOWEST));
 
         if (nextTokenIs(TokenType.SEMICOLON)) {
             nextTk();
         }
-
         return statement;
-    
     }
 
     private Expression parseExpression(int precedence) {
@@ -199,12 +185,10 @@ public class Parser {
             nextTk();   
             leftExpression = infix(leftExpression);
         }
-
         return leftExpression;
     }
 
     private Expression parseIntegerLiteral() {
-
         try {
             var literal = new IntegerLiteral(token: currentToken);
             long value = long.Parse(literal.token.Literal);
@@ -226,25 +210,19 @@ public class Parser {
     private Expression parsePrefixExpression() {
         var exp = new PrefixExpression(currentToken);
         exp.operators = currentToken.Literal;
-
         nextTk();   
-
         exp.right = parseExpression(precedence: (((int)Precedences.PREFIX)));
 
         return exp;
     }
 
     private Expression parseInfixExpression(Expression left) {
-
         var exp = new InfixExpression(currentToken) {
             operators = currentToken.Literal,
             leftValue = left
         };
-
         int prec = currentPrecedence();
-
         nextTk();   
-
         exp.rightValue = parseExpression(precedence: prec);
 
         return exp;
@@ -252,6 +230,54 @@ public class Parser {
 
     private Expression parseBoolean() {
         return new Bool(currentToken, currentTokenIs(TokenType.TRUE));
+    }
+
+    private Expression parseGroupedExpression() {
+        nextTk();
+        var exp = parseExpression((int)Precedences.LOWEST);
+
+        if (!expectedPeek(Token.RPAREN.Type)) {
+            return null;
+        }
+
+        return exp;
+    }
+
+    private Expression parseIfExpression() {
+        var exp = new IfExpression(currentToken);
+
+        if (!expectedPeek(TokenType.LPAREN)) {
+            return null;
+        }
+        nextTk();
+        exp.condition = parseExpression((int)Precedences.LOWEST);
+
+        if (!expectedPeek(TokenType.RPAREN)) {
+            return null;
+        }
+        
+        if (!expectedPeek(TokenType.LBRACE)) {
+            return null;
+        }
+
+        exp.consequence = parseBlockStatement((int)Precedences.LOWEST);
+
+        return exp;
+    }
+
+    private BlockStatement parseBlockStatement(int precedence) {
+        var blockStmt = new BlockStatement(currentToken);
+        blockStmt.statements = new List<Statement>();
+        nextTk();
+
+        while(!currentTokenIs(TokenType.RBRACE) && !currentTokenIs(TokenType.EOF)) {
+            var statement = parseStatement();
+            statement.Should().NotBe(null);
+            blockStmt.statements.Add(statement);
+            nextTk();
+        }
+
+        return blockStmt;
     }
 
     public bool expectedPeek(TokenType type) {
@@ -271,7 +297,7 @@ public class Parser {
     }
 
     public ArrayList Error() {
-        return this.errors;
+        return errors;
     }
 
     public bool nextTokenIs(TokenType type) {
@@ -281,5 +307,4 @@ public class Parser {
     public bool currentTokenIs(TokenType type) {
         return currentToken.Type == type;
     }
-
 }

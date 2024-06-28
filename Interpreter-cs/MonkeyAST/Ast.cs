@@ -16,13 +16,13 @@ public class Prog {
         }
     }
 
-    public string toString() {
+    public override string ToString() {
 
         string outString = "";
 
         for (int i = 0; i < statements.Count; i++){
             Console.Write(statements[i].ToString());
-            outString += statements[i].toString();
+            outString += statements[i].ToString();
         }
         
         return outString.ToString();
@@ -33,7 +33,7 @@ public interface Node {
     Token token { get; set; }
     string TokenLiteral();
 
-    string toString();
+    string ToString();
 }
 
 public interface Expression : Node { }
@@ -46,11 +46,8 @@ internal class LetStatement(Token token) : Statement {
 
     Token Node.token { get => token; set => throw new NotImplementedException(); }
 
-    public string toString() {
-
-        string outString = "";
-
-        outString = token.Literal + " " + name.identValue + " = ";
+    public override string ToString() {
+        string outString = token.Literal + " " + name.identValue + " = ";
 
         if(value != null) {
             outString += (value.identValue);
@@ -73,10 +70,8 @@ internal class ReturnStatement(Token token) : Statement {
 
     Token Node.token { get => token; set => throw new NotImplementedException(); }
 
-    public string toString() {
-        string outString = "";
-
-        outString = token.Literal + " ";
+    public override string ToString() {
+        string outString = token.Literal + " ";
 
         if(value != null) {
             outString += (value.ToString());
@@ -98,10 +93,10 @@ internal class ExpressionStatement(Token token) : Expression, Statement {
 
     Token Node.token { get => token ; set => throw new NotImplementedException(); }
 
-    public string toString() {
+    public override string ToString() {
         
         if(expression != null) {
-            return expression.toString();
+            return expression.ToString();
         }
         return "";
 
@@ -123,7 +118,7 @@ class Identifier(Token token, string ident) : Expression {
         return identValue;
     }
 
-    string Node.toString() {
+    string Node.ToString() {
         return $"{identValue}"; 
     }
 
@@ -139,7 +134,7 @@ class IntegerLiteral(Token token) : Expression{
         return token.Literal;
     }
 
-    public string toString() {
+    public override string ToString() {
         return token.Literal;
     }
 }
@@ -156,8 +151,8 @@ class PrefixExpression(Token token) : Expression {
         return token.Literal;
     }
 
-    public string toString() {
-        return $"({operators}{right.toString()})";
+    public override string ToString() {
+        return $"({operators}{right.ToString()})";
     }
 }
 
@@ -174,8 +169,8 @@ class InfixExpression(Token token) : Expression {
         return token.Literal;
     }
 
-    public string toString() {
-        return $"({leftValue.toString()} {operators} {rightValue.toString()})";
+    public override string ToString() {
+        return $"({leftValue.ToString()} {operators} {rightValue.ToString()})";
     }
 }
 
@@ -190,7 +185,50 @@ class Bool(Token token, bool value) : Expression {
         return token.Literal;
     }
 
-    public string toString() {
+    public override string ToString() {
         return value.ToString().ToLower();
+    }
+}
+
+class IfExpression(Token tok) : Expression {
+
+    internal Token token = tok;
+    internal Expression condition;
+    internal BlockStatement consequence;
+    internal BlockStatement alternative;
+
+    Token Node.token { get => token; set => throw new NotImplementedException(); }
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+
+    public string toString() {
+        var outStr =  $"if{condition.ToString()} {consequence.ToString()}";
+        if (alternative != null) {
+            outStr += $"else {alternative.ToString()}";
+        }
+
+        return outStr;
+    }
+}
+
+public class BlockStatement(Token tok) : Statement {
+
+    internal Token token = tok;
+    internal List<Statement> statements; 
+
+    Token Node.token { get => tok; set => throw new NotImplementedException(); }
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+
+    public override string ToString() {
+        var outStr = "";
+        foreach (var statement in statements) {
+            outStr += statement.ToString();
+        }
+        return outStr;
     }
 }

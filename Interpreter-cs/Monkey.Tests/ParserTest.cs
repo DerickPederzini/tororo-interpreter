@@ -92,7 +92,7 @@ public class ParserTest {
 
         for(int i = 0; i < program.statements.Count; i++) {
 
-            if(program.statements[i] is not ReturnStatement returns) {
+            if(program.statements[i] is not ReturnStatement) {
                 Assert.IsTrue(false, "not return statement");
             }
             var returnStatement = program.statements[i] as ReturnStatement;
@@ -211,7 +211,6 @@ public class ParserTest {
         yield return new object[] { "!true;", "!", true };
         yield return new object[] { "!false;", "!", false };
     }
-
     
     [Theory]
     [MemberData(nameof(testPrefix))]
@@ -324,7 +323,10 @@ public class ParserTest {
             new testOperatorPrecedense("3 + 4 * 5 == 3 * 1 + 4 * 5","((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
             new testOperatorPrecedense("false", "false"),
             new testOperatorPrecedense("3 > 5 == false", "((3 > 5) == false)"),
-            new testOperatorPrecedense("3 < 5 == true", "((3 < 5) == true)")
+            new testOperatorPrecedense("3 < 5 == true", "((3 < 5) == true)"),
+            new testOperatorPrecedense("2 / (5 + 5)", "(2 / (5 + 5))"),
+            new testOperatorPrecedense("-(5 + 5)", "(-(5 + 5))"),
+            new testOperatorPrecedense("!(true == true)", "(!(true == true))"),
 
         };
 
@@ -336,7 +338,7 @@ public class ParserTest {
 
             checkParserErrors(p);
 
-            var actual = program.toString();
+            var actual = program.ToString();
 
             actual.Should().NotBe(null);
 
@@ -346,6 +348,100 @@ public class ParserTest {
             }
         }
     }
+
+    [Fact]
+    public void testIfExpression() {
+        string input = "if (x > y) { x }";
+        Lexer lex = new Lexer(input);
+        Parser p = new Parser(lex);
+        Prog program = p.parseProgram(new Prog());
+
+        checkParserErrors(p);
+
+        program.Should().NotBe(null);
+
+        program.statements.Count.Should().Be(1, "Body does not have 1 statements, it has "+program.statements.Count);
+
+        var statement = program.statements[0] as ExpressionStatement;
+        
+        statement.Should().NotBe(null);
+
+        Assert.IsInstanceOfType(statement, typeof(ExpressionStatement), $"Statement is not an instance of Expression Statement, it is a {statement.GetType()}");
+
+        var exp = statement.expression as IfExpression;
+
+        exp.Should().NotBe(null);
+
+        Assert.IsInstanceOfType(exp, typeof(IfExpression), $"Exp is not an instance of IfExpression, it is a {exp.GetType()}");
+
+        testInfixExpression(exp.condition, "x", ">", "y").Should().Be(true);
+
+        exp.consequence.statements.Count.Should().Be(1, $"Exp consequence does not have 1 statement, it has {exp.consequence.statements.Count}");
+
+        var consequence = exp.consequence.statements[0] as ExpressionStatement;
+
+        Assert.IsInstanceOfType(consequence, typeof(ExpressionStatement), $"Consequence is not of type Expression Statement, it is of type {consequence.GetType()}");
+
+        if(!testIdentifier(consequence.expression, "x")) {
+            return;
+        }
+
+        if(exp.alternative != null) {
+            Assert.IsTrue(false, $"exp.alternative does not equal null, it has {exp.alternative.statements.Count} statements");
+        }
+
+    }
+
+    
+    public void testIfElseExpression() {
+        string input = "if (x > y) { x } else { y }";
+        Lexer lex = new Lexer(input);
+        Parser p = new Parser(lex);
+        Prog program = p.parseProgram(new Prog());
+
+        checkParserErrors(p);
+
+        program.Should().NotBe(null);
+
+        program.statements.Count.Should().Be(1, "Body does not have 1 statements, it has "+program.statements.Count);
+
+        var statement = program.statements[0] as ExpressionStatement;
+        
+        statement.Should().NotBe(null);
+
+        Assert.IsInstanceOfType(statement, typeof(ExpressionStatement), $"Statement is not an instance of Expression Statement, it is a {statement.GetType()}");
+
+        var exp = statement.expression as IfExpression;
+
+        exp.Should().NotBe(null);
+
+        Assert.IsInstanceOfType(exp, typeof(IfExpression), $"Exp is not an instance of IfExpression, it is a {exp.GetType()}");
+
+        if(!testInfixExpression(exp.condition, "x", "<", "y")) {
+            return;
+        }
+
+        exp.consequence.statements.Count.Should().Be(1, $"Exp consequence does not have 1 statement, it has {exp.consequence.statements.Count}");
+
+        var consequence = exp.consequence.statements[0] as ExpressionStatement;
+
+        Assert.IsInstanceOfType(consequence, typeof(ExpressionStatement), $"Consequence is not of type Expression Statement, it is of type {consequence.GetType()}");
+
+        if(!testIdentifier(consequence.expression, "x")) {
+            return;
+        }
+
+        var alternative = exp.alternative.statements[0] as ExpressionStatement;
+        
+        Assert.IsInstanceOfType(alternative, typeof(ExpressionStatement), $"Alternative is not of type Expression Statement, it is of type {alternative.GetType()}");
+        
+        if(!testIdentifier(alternative.expression, "y")) {
+            return;
+        }
+
+    }
+
+
     public bool testIntegerLiteral(Expression exp, long value) {
         var integ = exp as IntegerLiteral;
 

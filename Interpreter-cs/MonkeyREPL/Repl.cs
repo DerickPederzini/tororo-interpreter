@@ -30,7 +30,7 @@ public class Repl {
             }
 
         }
-        catch (IndexOutOfRangeException e) {
+        catch (IndexOutOfRangeException) {
             Console.WriteLine("Exiting Prompt...");
         }
 

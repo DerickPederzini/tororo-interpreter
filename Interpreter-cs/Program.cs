@@ -11,9 +11,5 @@ Console.WriteLine(test.Length);
 Console.WriteLine("Feel free to try and type commands in!");
 
 repl.startReader();
-enum e {
-    LOWEST = 1,
-    HIGH,
-}
 
 
