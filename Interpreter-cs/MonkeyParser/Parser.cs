@@ -282,23 +282,41 @@ public class Parser {
         if (!expectedPeek(TokenType.LPAREN)) {
             return null;
         }
+
+        exp.parameters = parseFunctionParemeters(exp);
+
         nextTk();
 
+        if (!expectedPeek(TokenType.LBRACE)) {
+            return null;
+        }    
+        exp.functionBody = parseBlockStatement();
+
+        return exp;
+    }
+
+    private List<Identifier> parseFunctionParemeters(FunctionExpression exp) {
+        if (nextTokenIs(TokenType.RPAREN)) {
+            return exp.parameters;
+        }
+
+        nextTk();
+
+        if (currentTokenIs(TokenType.IDENT) && nextTokenIs(TokenType.RPAREN)) {
+            exp.parameters.Add((Identifier)parseIdentifier());
+            return exp.parameters;
+        }
         while (!currentTokenIs(TokenType.RPAREN)) {
+
             if (currentTokenIs(TokenType.IDENT)) {
                 exp.parameters.Add((Identifier)parseIdentifier());
             }
             nextTk();
         }
 
-        if (!expectedPeek(TokenType.LBRACE)) {
-            return null;
-        }
-        
-        exp.functionBody = parseBlockStatement();
-
-        return exp;
+        return exp.parameters;
     }
+
     private BlockStatement parseBlockStatement() {
         var blockStmt = new BlockStatement(currentToken);
         nextTk();

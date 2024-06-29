@@ -19,7 +19,7 @@ public class ParserTest {
 
     [Fact]
     public void testLetStatements() {
-    string input = """
+        string input = """
         let x = 5;
         let y = 2;
         let z = 2;
@@ -41,7 +41,7 @@ public class ParserTest {
         var j = 0;
         for (int i = 0; i < tests.Length; i++) {
             Statement s = p.statements[i];
-            if(s.TokenLiteral() == "let") {
+            if (s.TokenLiteral() == "let") {
                 testLetStatement(s, tests[j]).Should().BeTrue();
                 j++;
             }
@@ -77,13 +77,13 @@ public class ParserTest {
         if (program.statements.Count != 3) {
             throw new Exception();
         }
-        for(int i = 0; i < program.statements.Count; i++) {
+        for (int i = 0; i < program.statements.Count; i++) {
 
             Assert.IsInstanceOfType(program.statements[i], typeof(ReturnStatement), $"program.statements[i] is " +
                 $"not a return statement, it is a {program.statements[i].GetType()}");
 
             var returnStatement = program.statements[i] as ReturnStatement;
-            returnStatement.token.Literal.Should().Be("return");   
+            returnStatement.token.Literal.Should().Be("return");
         }
     }
 
@@ -93,7 +93,7 @@ public class ParserTest {
         Lexer lex = new Lexer(input);
         Parser p = new Parser(lex);
         Prog program = p.parseProgram(new Prog());
-        checkParserErrors(p); 
+        checkParserErrors(p);
 
         program.statements.Count().Should().Be(1, $"Expected program to have 1 statement, found {program.statements.Count}");
 
@@ -106,7 +106,7 @@ public class ParserTest {
 
         ident.identValue.Should().Be("foobar");
         ident.token.Literal.Should().Be("foobar");
-    }  
+    }
 
     [Fact]
     public void TestBoolenExpression() {
@@ -128,7 +128,7 @@ public class ParserTest {
 
         ident.value.Should().Be(true);
         ident.token.Literal.Should().Be("true");
-    }  
+    }
 
     [Fact]
     public void testIntegerLiteralExpression() {
@@ -154,7 +154,7 @@ public class ParserTest {
         yield return new object[] { "!true;", "!", true };
         yield return new object[] { "!false;", "!", false };
     }
-    
+
     [Theory]
     [MemberData(nameof(testPrefix))]
     public void testParsingPrefixExpressions(string input, string operation, object value) {
@@ -221,7 +221,7 @@ public class ParserTest {
             if (!testLiteralExpression(expression.rightValue, test.rightValue)) {
                 return;
             }
-        }   
+        }
     }
 
     struct testOperatorPrecedense(string input, string expected) {
@@ -253,8 +253,8 @@ public class ParserTest {
 
             var actual = program.ToString();
             actual.Should().NotBe(null);
-            if(actual != test.expected){
-                Assert.IsTrue(false, "Actual is not expected, expected "+test.expected+"  got "+actual);
+            if (actual != test.expected) {
+                Assert.IsTrue(false, "Actual is not expected, expected " + test.expected + "  got " + actual);
             }
         }
     }
@@ -268,7 +268,7 @@ public class ParserTest {
         checkParserErrors(p);
 
         program.Should().NotBe(null);
-        program.statements.Count.Should().Be(1, "Body does not have 1 statements, it has "+program.statements.Count);
+        program.statements.Count.Should().Be(1, "Body does not have 1 statements, it has " + program.statements.Count);
 
         var statement = program.statements[0] as ExpressionStatement;
         statement.Should().NotBe(null);
@@ -283,10 +283,10 @@ public class ParserTest {
         var consequence = exp.consequence.statements[0] as ExpressionStatement;
         Assert.IsInstanceOfType(consequence, typeof(ExpressionStatement), $"Consequence is not of type Expression Statement, it is of type {consequence.GetType()}");
 
-        if(!testIdentifier(consequence.expression, "x")) {
+        if (!testIdentifier(consequence.expression, "x")) {
             return;
         }
-        if(exp.alternative != null) {
+        if (exp.alternative != null) {
             Assert.IsTrue(false, $"exp.alternative does not equal null, it has {exp.alternative.statements.Count} statements");
         }
     }
@@ -300,7 +300,7 @@ public class ParserTest {
         checkParserErrors(p);
 
         program.Should().NotBe(null);
-        program.statements.Count.Should().Be(1, "Body does not have 1 statements, it has "+program.statements.Count);
+        program.statements.Count.Should().Be(1, "Body does not have 1 statements, it has " + program.statements.Count);
 
         var statement = program.statements[0] as ExpressionStatement;
         statement.Should().NotBe(null);
@@ -310,7 +310,7 @@ public class ParserTest {
         exp.Should().NotBe(null);
         Assert.IsInstanceOfType(exp, typeof(IfExpression), $"Exp is not an instance of IfExpression, it is a {exp.GetType()}");
 
-        if(!testInfixExpression(exp.condition, "x", "<", "y")) {
+        if (!testInfixExpression(exp.condition, "x", "<", "y")) {
             return;
         }
 
@@ -318,14 +318,14 @@ public class ParserTest {
         var consequence = exp.consequence.statements[0] as ExpressionStatement;
         Assert.IsInstanceOfType(consequence, typeof(ExpressionStatement), $"Consequence is not of type Expression Statement, it is of type {consequence.GetType()}");
 
-        if(!testIdentifier(consequence.expression, "x")) {
+        if (!testIdentifier(consequence.expression, "x")) {
             return;
         }
 
         var alternative = exp.alternative.statements[0] as ExpressionStatement;
         Assert.IsInstanceOfType(alternative, typeof(ExpressionStatement), $"Alternative is not of type Expression Statement, it is of type {alternative.GetType()}");
-  
-        if(!testIdentifier(alternative.expression, "y")) {
+
+        if (!testIdentifier(alternative.expression, "y")) {
             return;
         }
     }
@@ -364,7 +364,33 @@ public class ParserTest {
         testInfixExpression(bodyStmt.expression, "x", "+", "y");
 
     }   
+    public static IEnumerable<object[]> testFnParameters() {
+        yield return new object[] { "fn() {};", new string[] { } };
+        yield return new object[] { "fn(x) {};", new string[] { "x" } };
+        yield return new object[] { "fn(x, y, z) {};", new string[] { "x", "y", "z" } };
+    }
 
+
+    [Theory]
+    [MemberData(nameof(testFnParameters))]
+    public void testFunctionParametersParsing(string input, string[] expected) {
+
+        Lexer lex = new Lexer(input);
+        Parser p = new Parser(lex);
+        Prog program = p.parseProgram(new Prog());
+        checkParserErrors(p);
+        program.Should().NotBe(null);
+
+        var statement = program.statements[0] as ExpressionStatement;
+        var function = statement.expression as FunctionExpression;
+
+        function.parameters.Count.Should().Be(expected.Length, $"functions.parameters.count should be {expected.Length}, but it is {function.parameters.Count}");
+
+        for (int i = 0; i < expected.Length; i++) {
+            testLiteralExpression(function.parameters[i], expected[i]);
+        }
+
+    }
 
     public bool testIntegerLiteral(Expression exp, long value) {
         var integ = exp as IntegerLiteral;
