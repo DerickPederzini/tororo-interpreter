@@ -32,7 +32,6 @@ public class Prog {
 public interface Node {
     Token token { get; set; }
     string TokenLiteral();
-
     string ToString();
 }
 
@@ -213,10 +212,30 @@ class IfExpression(Token tok) : Expression {
     }
 }
 
+class FunctionExpression(Token tok) : Expression {
+    internal Token token = tok;
+    internal List<Identifier> parameters = new List<Identifier>();
+    internal BlockStatement functionBody;
+
+    Token Node.token { get => token; set => throw new NotImplementedException(); }
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+    public override string ToString() {
+        var param = new List<string>();
+
+        foreach(var parameter in parameters) {
+            param.Add(parameter.ToString());
+        }
+        return $"{TokenLiteral()} ({string.Join(param.ToString(), ",")}) {functionBody.ToString()}";
+    }
+}
+
 public class BlockStatement(Token tok) : Statement {
 
     internal Token token = tok;
-    internal List<Statement> statements; 
+    internal List<Statement> statements = new List<Statement>(); 
 
     Token Node.token { get => tok; set => throw new NotImplementedException(); }
 

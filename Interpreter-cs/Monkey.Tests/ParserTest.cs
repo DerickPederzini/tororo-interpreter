@@ -330,6 +330,41 @@ public class ParserTest {
         }
     }
 
+    [Fact]
+    public void testFunctionLiteralParsing() {
+
+        string input = "fn(x, y) { x + y }";
+
+        Lexer lex = new Lexer(input);
+        Parser p = new Parser(lex);
+        Prog program = p.parseProgram(new Prog());
+
+        checkParserErrors(p);
+
+        program.Should().NotBeNull("program is null");
+        program.statements.Count.Should().Be(1, "Program.statements.count does not equal 1, it equals "+program.statements.Count);
+
+        var statement = program.statements[0] as ExpressionStatement;
+        statement.Should().NotBeNull("Statement is null");
+        Assert.IsInstanceOfType(statement, typeof(ExpressionStatement), $"Expected statement to be of type Expression statement, but it is {statement.GetType()}");
+        
+        var exp = statement.expression as FunctionExpression;
+        exp.Should().NotBeNull("Statement is null");
+        Assert.IsInstanceOfType(exp, typeof(FunctionExpression), $"Expected exp to be of type Fucntionxpression, but it is {exp.GetType()}");
+        exp.parameters.Count.Should().Be(2);
+
+        testLiteralExpression(exp.parameters[0], "x");
+        testLiteralExpression(exp.parameters[1], "y");
+
+        exp.functionBody.statements.Count.Should().Be(1);
+        var bodyStmt = exp.functionBody.statements[0] as ExpressionStatement;
+        bodyStmt.Should().NotBeNull();
+        Assert.IsInstanceOfType(bodyStmt, typeof(ExpressionStatement), $"Expected bodyStmt to be of type Expression Statement, but it is a {bodyStmt.GetType()}");
+
+        testInfixExpression(bodyStmt.expression, "x", "+", "y");
+
+    }   
+
 
     public bool testIntegerLiteral(Expression exp, long value) {
         var integ = exp as IntegerLiteral;

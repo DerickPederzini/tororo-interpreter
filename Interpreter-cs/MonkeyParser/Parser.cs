@@ -48,6 +48,8 @@ public class Parser {
 
         registerPrefix(TokenType.IF, parseIfExpression);
         registerPrefix(TokenType.ELSE, parseIfExpression);
+
+        registerPrefix(TokenType.FUNCTION, parseFunctionExpression);
     }
     //precedences
     enum Precedences {
@@ -255,6 +257,7 @@ public class Parser {
         if (!expectedPeek(TokenType.RPAREN)) {
             return null;
         }
+
         if (!expectedPeek(TokenType.LBRACE)) {
             return null;
         }
@@ -273,9 +276,31 @@ public class Parser {
         return exp;
     }
 
+    private Expression parseFunctionExpression() {
+        var exp = new FunctionExpression(currentToken);
+
+        if (!expectedPeek(TokenType.LPAREN)) {
+            return null;
+        }
+        nextTk();
+
+        while (!currentTokenIs(TokenType.RPAREN)) {
+            if (currentTokenIs(TokenType.IDENT)) {
+                exp.parameters.Add((Identifier)parseIdentifier());
+            }
+            nextTk();
+        }
+
+        if (!expectedPeek(TokenType.LBRACE)) {
+            return null;
+        }
+        
+        exp.functionBody = parseBlockStatement();
+
+        return exp;
+    }
     private BlockStatement parseBlockStatement() {
         var blockStmt = new BlockStatement(currentToken);
-        blockStmt.statements = new List<Statement>();
         nextTk();
 
         while(!currentTokenIs(TokenType.RBRACE) && !currentTokenIs(TokenType.EOF)) {
