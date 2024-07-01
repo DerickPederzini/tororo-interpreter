@@ -21,7 +21,6 @@ public class Prog {
         string outString = "";
 
         for (int i = 0; i < statements.Count; i++){
-            Console.Write(statements[i].ToString());
             outString += statements[i].ToString();
         }
         

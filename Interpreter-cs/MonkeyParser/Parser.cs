@@ -16,7 +16,7 @@ public class Parser {
     Lexer lexer;
     Token currentToken;
     Token nextToken;
-    ArrayList errors;
+    internal ArrayList errors;
     Dictionary<TokenType, infixParse> infixParses = new Dictionary<TokenType, infixParse>();
     Dictionary<TokenType, prefixParse> prefixParses = new Dictionary<TokenType, prefixParse>();
 

@@ -1,7 +1,11 @@
-﻿using Interpreter_cs.MonkeyLexer.Token;
+﻿using FluentAssertions;
+using Interpreter_cs.MonkeyLexer.Token;
+using Interpreter_cs.MonkeyParser;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,19 +25,27 @@ public class Repl {
                 if (line == null)
                     break;
 
-                var lex = new Lexer(line);
+                Lexer lex = new Lexer(line);
+                Parser p = new Parser(lex);
+                MonkeyAST.Prog program = p.parseProgram(new MonkeyAST.Prog());
 
-                for (Token tok = lex.nextToken(); tok != Token.EOF; tok = lex.nextToken()) {
-                    Console.WriteLine($"{tok}");
+                if (p.errors.Count != 0) {
+                    printParserError(p.errors);
+                    continue;
                 }
 
+                Console.WriteLine(program.ToString()+"\n");
             }
-
         }
         catch (IndexOutOfRangeException) {
             Console.WriteLine("Exiting Prompt...");
         }
 
+    }
+    public void printParserError(ArrayList errors) {
+        foreach(var err in errors) {
+            Console.WriteLine("\t"+err.ToString()+"\n");
+        }
     }
 
 
