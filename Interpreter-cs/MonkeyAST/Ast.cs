@@ -251,3 +251,30 @@ public class BlockStatement(Token tok) : Statement {
         return outStr;
     }
 }
+
+public class CallExpression(Token tok) : Expression {
+
+    internal Token token = tok;
+    internal List<Expression> arguments;
+    internal Expression identifierExpression;
+        
+
+
+    Token Node.token { get => token; set => throw new NotImplementedException(); }
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+
+    public override string ToString() {
+
+        List<string> args = new List<string>();
+
+        foreach (var statement in arguments) {
+            args.Add(statement.ToString());
+        }
+        return $"{identifierExpression.ToString()}({string.Join(args.ToString(), ", ")})";
+    }
+}
+
+

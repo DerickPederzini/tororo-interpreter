@@ -50,6 +50,7 @@ public class Parser {
         registerPrefix(TokenType.ELSE, parseIfExpression);
 
         registerPrefix(TokenType.FUNCTION, parseFunctionExpression);
+        registerInfix(TokenType.LPAREN, parseCallExpression);
     }
     //precedences
     enum Precedences {
@@ -72,6 +73,7 @@ public class Parser {
         { TokenType.SLASH, Precedences.PRODUCT },
         { TokenType.LANGLE, Precedences.LESSGREATER },
         { TokenType.RANGLE, Precedences.LESSGREATER },
+        { TokenType.LPAREN, Precedences.CALL }
     };
 
     public void nextTk() {
@@ -330,6 +332,33 @@ public class Parser {
 
         return blockStmt;
     }
+
+    private Expression parseCallExpression(Expression fn) {
+        var exp = new CallExpression(currentToken) { identifierExpression = fn };
+        exp.arguments = parseArguments();
+        return exp;
+    }
+
+    private List<Expression> parseArguments() {
+        var args = new List<Expression>();
+
+        if (nextTokenIs(TokenType.RPAREN)) {
+            return args;
+        }
+
+        nextTk();
+        args.Add(parseExpression((int)Precedences.LOWEST));
+
+        while (nextTokenIs(TokenType.COMMA)) {
+            nextTk();
+            nextTk(); 
+            args.Add(parseExpression((int)Precedences.LOWEST));
+        }
+        if (!expectedPeek(TokenType.RPAREN)) {
+            return null;
+        }
+        return args;
+    }  
 
     public bool expectedPeek(TokenType type) {
         if (nextTokenIs(type)) {

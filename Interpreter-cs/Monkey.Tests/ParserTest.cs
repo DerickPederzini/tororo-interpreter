@@ -392,6 +392,37 @@ public class ParserTest {
 
     }
 
+    [Fact]
+    public void testCallExpressionParsing() {
+
+        string input = "add(1, 2 * 3, 4 + 5);";
+        Lexer lex = new Lexer(input);
+        Parser p = new Parser(lex);
+        Prog program = p.parseProgram(new Prog());
+        checkParserErrors(p);
+
+        program.Should().NotBeNull("Program is null");
+        program.statements.Count.Should().Be(1, $"Expected program to have 1 statement, but it has {program.statements.Count}");
+
+        var statement = program.statements[0] as ExpressionStatement;
+        statement.Should().NotBeNull("Statement is null");
+        Assert.IsInstanceOfType(statement, typeof(ExpressionStatement), $"Expected statement to be of type ExpressionStatement, but it is {statement.GetType()}");
+
+        var exp = statement.expression as CallExpression;
+        exp.Should().NotBeNull("Expression is null");
+        Assert.IsInstanceOfType(exp, typeof(CallExpression), $"Expected exp to be of type CallExpression, but it is a {exp.GetType()}");
+
+        if (!testIdentifier(exp.identifierExpression, "add")) {
+            return;
+        }
+
+        exp.arguments.Count.Should().Be(3, $"Wrong length of arguments for expression, got {exp.arguments.Count} instead of 3");
+
+        testLiteralExpression(exp.arguments[0], 1);
+        testInfixExpression(exp.arguments[1], 2, "*", 3);
+        testInfixExpression(exp.arguments[2], 4, "+" ,5);
+    }
+
     public bool testIntegerLiteral(Expression exp, long value) {
         var integ = exp as IntegerLiteral;
 
