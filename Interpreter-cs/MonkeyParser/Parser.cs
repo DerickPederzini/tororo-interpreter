@@ -132,18 +132,27 @@ public class Parser {
         if (!expectedPeek(TokenType.ASSIGN)) {
             return null;
         }
-        while (currentTokenIs(TokenType.SEMICOLON)) {
+
+        nextTk();
+
+        statement.value = parseExpression((int)Precedences.LOWEST);
+
+        if (nextTokenIs(TokenType.SEMICOLON)) {
             nextTk();
         }
+
         return statement;
     }
 
     public Statement parseReturnStatement() {
         ReturnStatement returnStatement = new ReturnStatement(currentToken);
-
-        while (!currentTokenIs(TokenType.SEMICOLON)) {
+        nextTk();
+        returnStatement.value = parseExpression((int)Precedences.LOWEST);
+    
+        if (!expectedPeek(TokenType.SEMICOLON)) {
             nextTk();
         }
+
         return returnStatement;
     }
 
@@ -287,8 +296,6 @@ public class Parser {
 
         exp.parameters = parseFunctionParemeters(exp);
 
-        nextTk();
-
         if (!expectedPeek(TokenType.LBRACE)) {
             return null;
         }    
@@ -299,6 +306,7 @@ public class Parser {
 
     private List<Identifier> parseFunctionParemeters(FunctionExpression exp) {
         if (nextTokenIs(TokenType.RPAREN)) {
+            nextTk();
             return exp.parameters;
         }
 
@@ -306,6 +314,7 @@ public class Parser {
 
         if (currentTokenIs(TokenType.IDENT) && nextTokenIs(TokenType.RPAREN)) {
             exp.parameters.Add((Identifier)parseIdentifier());
+            nextTk();
             return exp.parameters;
         }
         while (!currentTokenIs(TokenType.RPAREN)) {

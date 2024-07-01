@@ -17,34 +17,31 @@ namespace Interpreter_cs.Monkey.Tests;
 
 public class ParserTest {
 
-    [Fact]
-    public void testLetStatements() {
-        string input = """
-        let x = 5;
-        let y = 2;
-        let z = 2;
-        """;
+    public static IEnumerable<object[]> testLet() {
+        yield return new object []{"let x = 5;", "x", 5 };
+        yield return new object[] {"let y = true;", "y", true };
+        yield return new object[] {"let foobar = y;", "foobar", "y" };
+    }
+
+    [Theory]
+    [MemberData(nameof(testLet))]
+    public void testLetStatements(string input, string ident, object value) {
         Lexer lex = new Lexer(input);
         Parser parser = new Parser(lex);
         var p = parser.parseProgram(new Prog());
         checkParserErrors(parser);
 
         p.statements.Should().NotBeNull("Parse Program is null");
-        p.statements.Count.Should().Be(6);
+        p.statements.Count.Should().Be(1);
+        var statement = p.statements[0] as LetStatement;
 
-        var tests = new string[]
-        {
-            "x",
-            "y",
-            "z",
-        };
-        var j = 0;
-        for (int i = 0; i < tests.Length; i++) {
-            Statement s = p.statements[i];
-            if (s.TokenLiteral() == "let") {
-                testLetStatement(s, tests[j]).Should().BeTrue();
-                j++;
-            }
+        if (!testLetStatement(statement, ident)) {
+            return;
+        }
+        var val = statement.value;
+        
+        if(!testLiteralExpression(val, value)) {
+            return; 
         }
     }
 
@@ -61,29 +58,29 @@ public class ParserTest {
         return true;
     }
 
-    [Fact]
-    public void testReturnStatements() {
-        string input = @"
-                return 5;
-                return 10;
-                return 993322;
-            ";
+    public static IEnumerable<object[]> testReturn() {
+        yield return new object[] { "return 5;", 5 };
+        yield return new object[] { "return x;", "x" };
+        yield return new object[] { "return 99920;", 99920 };
+    }
 
+    [Theory]
+    [MemberData(nameof(testReturn))]
+    public void testReturnStatements(string input, object val) {
         Lexer lex = new Lexer(input);
         Parser p = new Parser(lex);
         var program = p.parseProgram(new Prog());
         checkParserErrors(p);
 
-        if (program.statements.Count != 3) {
-            throw new Exception();
-        }
-        for (int i = 0; i < program.statements.Count; i++) {
+        program.Should().NotBeNull();
+        program.statements.Count.Should().Be(1);
 
-            Assert.IsInstanceOfType(program.statements[i], typeof(ReturnStatement), $"program.statements[i] is " +
-                $"not a return statement, it is a {program.statements[i].GetType()}");
+        var statement = program.statements[0] as ReturnStatement;
+        statement.Should().NotBeNull();
+        statement.token.Literal.Should().Be("return");
 
-            var returnStatement = program.statements[i] as ReturnStatement;
-            returnStatement.token.Literal.Should().Be("return");
+        if (!testLiteralExpression(statement.value, val)) {
+            return;
         }
     }
 
@@ -491,7 +488,7 @@ public class ParserTest {
         return true;
     }
 
-    public void checkParserErrors(Parser parser) {
+    private void checkParserErrors(Parser parser) {
         var errors = parser.Error();
         if(errors.Count == 0) {
             return;

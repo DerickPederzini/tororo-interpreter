@@ -37,11 +37,11 @@ public interface Node {
 
 public interface Expression : Node { }
 public interface Statement : Node { }
-internal class LetStatement(Token token) : Statement {
+class LetStatement(Token token) : Statement {
 
     internal Token token = token;
     internal Identifier name;
-    internal Identifier value;
+    internal Expression value;
 
     Token Node.token { get => token; set => throw new NotImplementedException(); }
 
@@ -49,7 +49,7 @@ internal class LetStatement(Token token) : Statement {
         string outString = token.Literal + " " + name.identValue + " = ";
 
         if(value != null) {
-            outString += (value.identValue);
+            outString += (value.ToString());
         }
 
         outString += ";";
@@ -62,7 +62,7 @@ internal class LetStatement(Token token) : Statement {
     }
 }
 
-internal class ReturnStatement(Token token) : Statement {
+class ReturnStatement(Token token) : Statement {
 
     internal Token token = token;
     internal Expression value;
@@ -86,7 +86,7 @@ internal class ReturnStatement(Token token) : Statement {
     }
 }
 
-internal class ExpressionStatement(Token token) : Expression, Statement {
+class ExpressionStatement(Token token) : Expression, Statement {
     internal Token token = token;
     internal Expression expression;
 
