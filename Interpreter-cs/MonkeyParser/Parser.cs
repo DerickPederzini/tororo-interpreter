@@ -134,7 +134,6 @@ public class Parser {
         }
 
         nextTk();
-
         statement.value = parseExpression((int)Precedences.LOWEST);
 
         if (nextTokenIs(TokenType.SEMICOLON)) {
@@ -181,24 +180,32 @@ public class Parser {
     }
 
     private Expression parseExpression(int precedence) {
-        var prefix = prefixParses[currentToken.Type];
+        try {
 
-        if (prefix == null) {
-            noPrefixParseFnError(currentToken.Type);
+            var prefix = prefixParses[currentToken.Type];
+
+            if (prefix == null) {
+                noPrefixParseFnError(currentToken.Type);
+                return null;
+            }
+            var leftExpression = prefix();
+
+            while (!nextTokenIs(TokenType.SEMICOLON) && peekPrecendence() > precedence) {
+                var infix = infixParses[nextToken.Type];
+
+                if (infix == null) {
+                    return leftExpression;
+                }
+                nextTk();
+                leftExpression = infix(leftExpression);
+            }
+            return leftExpression;
+        }
+        catch (KeyNotFoundException e) {
+            Console.WriteLine($"The value {lexer.input[lexer.position - 1]} was not present in the list of possible characters for that expression");
+            errors.Add(e);
             return null;
         }
-        var leftExpression = prefix();
-
-        while (!nextTokenIs(TokenType.SEMICOLON) && peekPrecendence() > precedence) {
-            var infix = infixParses[nextToken.Type];
-
-            if (infix == null) {
-                return leftExpression;
-            }
-            nextTk();   
-            leftExpression = infix(leftExpression);
-        }
-        return leftExpression;
     }
 
     private Expression parseIntegerLiteral() {

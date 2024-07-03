@@ -9,10 +9,10 @@ namespace Interpreter_cs.MonkeyLexer.Token;
 
 public class Lexer
 {
-    string input;//as a whole
-    int position;// points to current character
+    internal string input;//as a whole
+    internal int position;// points to current character
     int readPosition; //points to after the current character
-    char currentCharacter;
+    internal char currentCharacter;
 
     public Lexer(string input) {
         this.input = input;

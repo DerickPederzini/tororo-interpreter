@@ -4,18 +4,16 @@ using static Interpreter_cs.MonkeyAST.Expression;
 
 namespace Interpreter_cs.MonkeyAST;
 
-public class Prog {
-
+public class Prog : Node{
     internal List<Statement> statements = new List<Statement>();
     public string TokenLiteral() {
         if (statements.Count > 0) {
-            return statements[0].token.Literal;
+            return statements[0].TokenLiteral();
         }
         else {
             return "";
         }
     }
-
     public override string ToString() {
 
         string outString = "";
@@ -29,20 +27,17 @@ public class Prog {
 }   
 
 public interface Node {
-    Token token { get; set; }
     string TokenLiteral();
     string ToString();
 }
 
 public interface Expression : Node { }
-public interface Statement : Node { }
+public interface Statement : Node, Expression{ }
 class LetStatement(Token token) : Statement {
 
     internal Token token = token;
     internal Identifier name;
     internal Expression value;
-
-    Token Node.token { get => token; set => throw new NotImplementedException(); }
 
     public override string ToString() {
         string outString = token.Literal + " " + name.identValue + " = ";
@@ -65,9 +60,6 @@ class ReturnStatement(Token token) : Statement {
 
     internal Token token = token;
     internal Expression value;
-
-    Token Node.token { get => token; set => throw new NotImplementedException(); }
-
     public override string ToString() {
         string outString = token.Literal + " ";
 
@@ -88,18 +80,12 @@ class ReturnStatement(Token token) : Statement {
 class ExpressionStatement(Token token) : Expression, Statement {
     internal Token token = token;
     internal Expression expression;
-
-    Token Node.token { get => token ; set => throw new NotImplementedException(); }
-
     public override string ToString() {
-        
         if(expression != null) {
             return expression.ToString();
         }
         return "";
-
     }
-
     public string TokenLiteral() {
         return token.Literal;
     }
@@ -109,9 +95,6 @@ class Identifier(Token token, string ident) : Expression {
 
     internal Token token = token;
     internal string identValue = ident;
-
-    Token Node.token { get => token ; set => throw new NotImplementedException(); }
-
     string Node.TokenLiteral() {
         return identValue;
     }
@@ -125,9 +108,6 @@ class Identifier(Token token, string ident) : Expression {
 class IntegerLiteral(Token token) : Expression{
     internal Token token = token;
     internal long value;
-
-    Token Node.token { get => token; set => throw new NotImplementedException(); }
-
     public string TokenLiteral() {
         return token.Literal;
     }
@@ -142,9 +122,6 @@ class PrefixExpression(Token token) : Expression {
     internal Token token = token;
     internal string operators;
     internal Expression right;
-
-    Token Node.token { get => token; set => throw new NotImplementedException(); }
-
     public string TokenLiteral() {
         return token.Literal;
     }
@@ -160,9 +137,6 @@ class InfixExpression(Token token) : Expression {
     internal Expression rightValue;
     internal string operators;
     internal Expression leftValue;
-
-    Token Node.token { get => token; set => throw new NotImplementedException(); }
-
     public string TokenLiteral() {
         return token.Literal;
     }
@@ -173,12 +147,8 @@ class InfixExpression(Token token) : Expression {
 }
 
 class Bool(Token token, bool value) : Expression {
-
     internal Token token = token;
     internal bool value = value;
-
-    Token Node.token { get => token; set => throw new NotImplementedException(); }
-
     public string TokenLiteral() {
         return token.Literal;
     }
@@ -194,9 +164,6 @@ class IfExpression(Token tok) : Expression {
     internal Expression condition;
     internal BlockStatement consequence;
     internal BlockStatement alternative;
-
-    Token Node.token { get => token; set => throw new NotImplementedException(); }
-
     public string TokenLiteral() {
         return token.Literal;
     }
@@ -215,9 +182,6 @@ class FunctionExpression(Token tok) : Expression {
     internal Token token = tok;
     internal List<Identifier> parameters = new List<Identifier>();
     internal BlockStatement functionBody;
-
-    Token Node.token { get => token; set => throw new NotImplementedException(); }
-
     public string TokenLiteral() {
         return token.Literal;
     }
@@ -235,9 +199,6 @@ public class BlockStatement(Token tok) : Statement {
 
     internal Token token = tok;
     internal List<Statement> statements = new List<Statement>(); 
-
-    Token Node.token { get => tok; set => throw new NotImplementedException(); }
-
     public string TokenLiteral() {
         return token.Literal;
     }
@@ -256,11 +217,6 @@ public class CallExpression(Token tok) : Expression {
     internal Token token = tok;
     internal List<Expression> arguments;
     internal Expression identifierExpression;
-        
-
-
-    Token Node.token { get => token; set => throw new NotImplementedException(); }
-
     public string TokenLiteral() {
         return token.Literal;
     }

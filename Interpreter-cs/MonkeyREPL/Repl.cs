@@ -34,15 +34,15 @@ public class Repl {
                     continue;
                 }
 
-                Console.WriteLine(program.ToString()+"\n");
+                Console.WriteLine(program.ToString() + "\n");
             }
         }
         catch (IndexOutOfRangeException) {
             Console.WriteLine("Exiting Prompt...");
         }
-
     }
     public void printParserError(ArrayList errors) {
+        Console.WriteLine("Found errors during parsing");
         foreach(var err in errors) {
             Console.WriteLine("\t"+err.ToString()+"\n");
         }

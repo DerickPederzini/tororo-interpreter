@@ -46,7 +46,7 @@ public class ParserTest {
     }
 
     public bool testLetStatement(Statement statementDone, string expected) {
-        statementDone.token.Literal.Should().Be("let", "statement.TokenLiteral should be 'let' ");
+        statementDone.TokenLiteral().Should().Be("let", "statement.TokenLiteral should be 'let' ");
 
         if (statementDone is not LetStatement letStatement) {
             Assert.IsTrue(false, $"Statement should be of type Letstatement, but it is {statementDone.GetType}");
