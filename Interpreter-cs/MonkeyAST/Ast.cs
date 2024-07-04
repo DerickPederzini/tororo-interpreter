@@ -1,6 +1,4 @@
 ﻿using Interpreter_cs.MonkeyLexer.Token;
-using System.Data.Common;
-using static Interpreter_cs.MonkeyAST.Expression;
 
 namespace Interpreter_cs.MonkeyAST;
 

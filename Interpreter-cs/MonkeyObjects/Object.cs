@@ -23,7 +23,7 @@ public class IntegerObj(long val) : ObjectInterface {
 public class BooleanObj(bool val) : ObjectInterface {
     internal bool value = val;
     public string Inspect() {
-        return "";
+        return value.ToString().ToLower();
     }
     public Type ObjectType() {
         return Type.BOOL_OBJ;
@@ -32,7 +32,7 @@ public class BooleanObj(bool val) : ObjectInterface {
 
 public class NullObj() : ObjectInterface {
     public string Inspect() {
-        return "";
+        return "null";
     }
     public Type ObjectType() {
         return Type.NULL_OBJ;

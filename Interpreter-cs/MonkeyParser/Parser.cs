@@ -2,12 +2,7 @@
 using FluentAssertions;
 using Interpreter_cs.MonkeyAST;
 using Interpreter_cs.MonkeyLexer.Token;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections;
-using System.Data;
-using System.Security;
-using static Interpreter_cs.MonkeyParser.Parser;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Interpreter_cs.MonkeyParser;
