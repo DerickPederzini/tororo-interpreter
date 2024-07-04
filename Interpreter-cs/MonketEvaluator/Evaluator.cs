@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 namespace Interpreter_cs.MonketEvaluator {
     public class Evaluator {
         public ObjectInterface Eval(Node node) {
-            Console.WriteLine(node.GetType());
             switch (node) {
                 case Prog p:
                     return evalStatements(p.statements);

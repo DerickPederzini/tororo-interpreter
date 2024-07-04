@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Interpreter_cs.MonketEvaluator;
 using Interpreter_cs.MonkeyLexer.Token;
 using Interpreter_cs.MonkeyParser;
 using System;
@@ -16,6 +17,7 @@ public class Repl {
     const string PROMPT = ">>";
 
     public void startReader() {
+
         try {
 
             while (true) {
@@ -34,9 +36,14 @@ public class Repl {
                     continue;
                 }
 
-                Console.WriteLine(program.ToString() + "\n");
+                Evaluator eval = new Evaluator();
+                var evalueated = eval.Eval(program);
+                evalueated.Should().NotBeNull();
+
+                Console.WriteLine(evalueated.Inspect()+"\n");
             }
         }
+
         catch (IndexOutOfRangeException) {
             Console.WriteLine("Exiting Prompt...");
         }

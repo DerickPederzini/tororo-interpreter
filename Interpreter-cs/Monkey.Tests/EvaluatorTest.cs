@@ -29,10 +29,8 @@ public class EvaluatorTest {
     [Theory]
     [MemberData(nameof(EvaluatorTestData))]
     public void testEvalLiteralExpression(string input, long expectedVal) {
-
         var evalueated = testEval(input);
         testIntegerObject(evalueated, expectedVal);
-    
     }
 
     private ObjectInterface testEval(string input) {

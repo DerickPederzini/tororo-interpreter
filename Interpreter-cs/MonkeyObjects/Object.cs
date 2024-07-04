@@ -5,7 +5,6 @@ public readonly record struct Type(string type) {
     internal static Type BOOL_OBJ = new("Boolean");
     internal static Type NULL_OBJ = new("null");
 }
-
 public interface ObjectInterface {
     Type ObjectType();
     public string Inspect();
@@ -13,11 +12,9 @@ public interface ObjectInterface {
 
 public class IntegerObj(long val) : ObjectInterface {
     internal long value = val;
-
     public string Inspect() {
-        throw new NotImplementedException();
+        return value.ToString();
     }
-
     public Type ObjectType() {
         return Type.Integer_OBJ;
     }
@@ -25,11 +22,9 @@ public class IntegerObj(long val) : ObjectInterface {
 
 public class BooleanObj(bool val) : ObjectInterface {
     internal bool value = val;
-
     public string Inspect() {
         return "";
     }
-
     public Type ObjectType() {
         return Type.BOOL_OBJ;
     }
