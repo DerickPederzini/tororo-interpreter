@@ -282,7 +282,6 @@ public class Parser {
             if (!expectedPeek(TokenType.LBRACE)) {
                 return null;
             }
-            nextTk();
             exp.alternative = parseBlockStatement();
         }
 

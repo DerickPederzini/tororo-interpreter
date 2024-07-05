@@ -6,10 +6,10 @@ using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 namespace Interpreter_cs.MonketEvaluator {
     public class Evaluator {
 
-        public struct References() {
-            internal static NullObj NULL = new NullObj();
-            internal static BooleanObj TRUE = new BooleanObj(true);
-            internal static BooleanObj FALSE = new BooleanObj(false);
+        record struct References() {
+            internal static readonly NullObj NULL = new NullObj();
+            internal static readonly BooleanObj TRUE = new BooleanObj(true);
+            internal static readonly BooleanObj FALSE = new BooleanObj(false);
         }
 
         public ObjectInterface Eval(Node node) {
@@ -29,6 +29,11 @@ namespace Interpreter_cs.MonketEvaluator {
                     var l = Eval(infix.leftValue);
                     var r = Eval(infix.rightValue);
                     return evalInfixExpression(infix.operators, l, r);
+                case BlockStatement block:
+                    return evalStatements(block.statements);
+                case IfExpression ifElse:
+                    return evalIfElseExpression(ifElse);
+                
             }
             return References.NULL;
         }
@@ -90,8 +95,11 @@ namespace Interpreter_cs.MonketEvaluator {
             if (l is IntegerObj && r is IntegerObj) {
                 return evalInfixInteger(operators, (IntegerObj)l, (IntegerObj)r);
             }
-            else if (l is BooleanObj && r is BooleanObj) {
-                return evalInfixBoolean(operators, (BooleanObj)l, (BooleanObj)r);
+            else if (operators == "==") {
+                return deciderOnBooleanObj(l == r);
+            }
+            else if (operators == "!=") {
+                return deciderOnBooleanObj(l != r);
             }
             else {
                 return References.NULL;
@@ -128,14 +136,30 @@ namespace Interpreter_cs.MonketEvaluator {
             }
         }
 
-        private ObjectInterface evalInfixBoolean(string op, BooleanObj l, BooleanObj r) {
-            if (op == "==") {
-                return new BooleanObj(l.value == r.value);
+        private ObjectInterface evalIfElseExpression(IfExpression ifExp) {
+
+            var condition = Eval(ifExp.condition);
+            if (isTruthy(condition)) {
+                return Eval(ifExp.consequence);
             }
-            else if (op == "!=") {
-                return new BooleanObj(r.value != l.value);
-            }else {
+            else if (ifExp.alternative != null) {
+                return Eval(ifExp.alternative);
+            }
+            else {
                 return References.NULL;
+            }
+        }
+
+        private bool isTruthy(ObjectInterface condition) {
+
+            if (condition.ObjectType().Equals(References.NULL)) {
+                return false;
+            }else if (condition.Equals(References.TRUE)) {
+                return true;
+            }else if (condition.Equals(References.FALSE)) {
+                return false;
+            }else {
+                return true;
             }
         }
     }

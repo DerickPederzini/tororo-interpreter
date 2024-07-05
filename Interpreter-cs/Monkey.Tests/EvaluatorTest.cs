@@ -4,6 +4,8 @@ using Interpreter_cs.MonkeyAST;
 using Interpreter_cs.MonkeyLexer.Token;
 using Interpreter_cs.MonkeyObjects;
 using Interpreter_cs.MonkeyParser;
+using Microsoft.Testing.Platform.Extensions.Messages;
+using Newtonsoft.Json;
 using Xunit;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -103,5 +105,34 @@ public class EvaluatorTest {
         testBooleanObject(evaluated, val);
     }
 
+    public static IEnumerable<object[]> ifElseTest() {
+        yield return new object[] {"if (true) { 10 }", 10}; 
+        yield return new object[] {"if (false) { 10 }", null};
+        yield return new object[] {"if (1) {10}", 10};
+        yield return new object[] {"if (1 > 2) { 10 }", null}; 
+        yield return new object[] {"if (1 < 2) { 10 }", 10}; 
+        yield return new object[] {"if (1 > 2) { 10 } else { 20 }", 20 }; 
+        yield return new object[] {"if (1 < 2) { 10 } else { 20 }", 10 }; 
+    }
 
+    [Theory]
+    [MemberData(nameof(ifElseTest))]
+    public void testIfElseExpressions(string input, object value) {
+        var evaluated = testEval(input);
+        
+        var integer = Convert.ToInt32(value);
+        if(integer != 0 && value != null) {
+            testIntegerObject(evaluated, (long)integer);
+        }else {
+            testNullObject(evaluated).Should().Be(true);
+        }
+        
+    }
+
+    private bool testNullObject(object value) {
+        if (value is not NullObj) {
+            return false;
+        }
+        return true;
+    }
 }
