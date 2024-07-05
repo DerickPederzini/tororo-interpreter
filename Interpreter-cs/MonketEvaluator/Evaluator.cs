@@ -25,6 +25,10 @@ namespace Interpreter_cs.MonketEvaluator {
                 case PrefixExpression exp:
                     var right = Eval(exp.right);
                     return evalPrefixExpression(exp.operators, right);
+                case InfixExpression infix:
+                    var l = Eval(infix.leftValue);
+                    var r = Eval(infix.rightValue);
+                    return evalInfixExpression(infix.operators, l, r);
             }
             return References.NULL;
         }
@@ -79,6 +83,60 @@ namespace Interpreter_cs.MonketEvaluator {
             }
             var val = right as IntegerObj;
             return new IntegerObj(-val.value);
+        }
+
+        private ObjectInterface evalInfixExpression(string operators, ObjectInterface l, ObjectInterface r) {
+
+            if (l is IntegerObj && r is IntegerObj) {
+                return evalInfixInteger(operators, (IntegerObj)l, (IntegerObj)r);
+            }
+            else if (l is BooleanObj && r is BooleanObj) {
+                return evalInfixBoolean(operators, (BooleanObj)l, (BooleanObj)r);
+            }
+            else {
+                return References.NULL;
+            }
+        }
+
+        private ObjectInterface evalInfixInteger(string op, IntegerObj l, IntegerObj r) {
+
+            if (op == "+") {
+                return new IntegerObj(l.value + r.value);
+            }
+            else if (op == "-") {
+                return new IntegerObj(l.value - r.value);
+            }
+            else if (op == "*") {
+                return new IntegerObj(l.value * r.value);
+            }
+            else if (op == ">") {
+                return deciderOnBooleanObj(l.value > r.value);
+            }
+            else if (op == "<") {
+                return deciderOnBooleanObj(l.value < r.value);
+            }
+            else if (op == "==") {
+                return deciderOnBooleanObj(l.value == r.value);
+            }
+            else if (op == "!=") {
+                return deciderOnBooleanObj(l.value != r.value);
+            }
+            else if (op == "/"){
+                return new IntegerObj(l.value / r.value);
+            }else {
+                return References.NULL;
+            }
+        }
+
+        private ObjectInterface evalInfixBoolean(string op, BooleanObj l, BooleanObj r) {
+            if (op == "==") {
+                return new BooleanObj(l.value == r.value);
+            }
+            else if (op == "!=") {
+                return new BooleanObj(r.value != l.value);
+            }else {
+                return References.NULL;
+            }
         }
     }
 }
