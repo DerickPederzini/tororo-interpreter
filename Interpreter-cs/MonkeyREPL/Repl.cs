@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using Interpreter_cs.MonketEvaluator;
+using Interpreter_cs.MonkeyEvaluator;
 using Interpreter_cs.MonkeyLexer.Token;
 using Interpreter_cs.MonkeyParser;
 using System.Collections;

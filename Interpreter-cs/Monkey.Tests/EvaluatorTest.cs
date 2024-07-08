@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using Interpreter_cs.MonketEvaluator;
+using Interpreter_cs.MonkeyEvaluator;
 using Interpreter_cs.MonkeyAST;
 using Interpreter_cs.MonkeyLexer.Token;
 using Interpreter_cs.MonkeyObjects;
@@ -119,14 +119,14 @@ public class EvaluatorTest {
     [MemberData(nameof(ifElseTest))]
     public void testIfElseExpressions(string input, object value) {
         var evaluated = testEval(input);
-        
+
+        //TO-DO: MAKE THIS A LITTLE BIT BETTER BECAUSE THERE IS NO WAY
         var integer = Convert.ToInt32(value);
         if(integer != 0 && value != null) {
             testIntegerObject(evaluated, (long)integer);
         }else {
             testNullObject(evaluated).Should().Be(true);
         }
-        
     }
 
     private bool testNullObject(object value) {
@@ -135,4 +135,26 @@ public class EvaluatorTest {
         }
         return true;
     }
+
+    public static IEnumerable<object[]> returnTest() {
+        yield return new object[] {"return 10;", 10}; 
+        yield return new object[] {"return 10; 9;", 10};
+        yield return new object[] {"return 2 * 5; 9;", 10};
+        yield return new object[] {"9; return 2 * 5; 9;", 10}; 
+    }
+
+    [Theory]
+    [MemberData(nameof(returnTest))]
+    public void testReturnStatement(string input, object value) {
+        var evaluated = testEval(input);
+
+        //TO-DO: MAKE THIS A LITTLE BIT BETTER BECAUSE THERE IS NO WAY
+        var integer = Convert.ToInt32(value);
+        if(integer != 0 && value != null) {
+            testIntegerObject(evaluated, integer);
+        }else {
+            testNullObject(evaluated).Should().Be(true);
+        }
+    }
+
 }

@@ -1,9 +1,12 @@
-﻿namespace Interpreter_cs.MonkeyObjects;
+﻿using System.Security.Cryptography.X509Certificates;
+
+namespace Interpreter_cs.MonkeyObjects;
 
 public readonly record struct Type(string type) {
     internal static Type Integer_OBJ = new("Integer");
     internal static Type BOOL_OBJ = new("Boolean");
     internal static Type NULL_OBJ = new("null");
+    internal static Type RETURN_OBJ = new("return");
 }
 public interface ObjectInterface {
     Type ObjectType();
@@ -38,3 +41,16 @@ public class NullObj() : ObjectInterface {
         return Type.NULL_OBJ;
     }
 }
+
+public class ReturnObj(ObjectInterface val) : ObjectInterface {
+    internal ObjectInterface value = val;
+
+    public string Inspect() {
+        return value.ToString().ToLower();
+    }
+
+    public Type ObjectType() {
+        return Type.RETURN_OBJ;
+    }
+}
+

@@ -1,9 +1,10 @@
 ﻿using FluentAssertions;
 using Interpreter_cs.MonkeyAST;
 using Interpreter_cs.MonkeyObjects;
+using System.Linq.Expressions;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace Interpreter_cs.MonketEvaluator {
+namespace Interpreter_cs.MonkeyEvaluator {
     public class Evaluator {
 
         record struct References() {
@@ -33,16 +34,21 @@ namespace Interpreter_cs.MonketEvaluator {
                     return evalStatements(block.statements);
                 case IfExpression ifElse:
                     return evalIfElseExpression(ifElse);
-                
+                case ReturnStatement returnStatement:
+                    var ret = Eval(returnStatement.value);
+                    return new ReturnObj(ret);
             }
             return References.NULL;
         }
-
         private ObjectInterface evalStatements(List<Statement> statement) {
             ObjectInterface result = null;
 
             foreach (Statement s in statement) {
                 result = Eval(s);
+                if (result.GetType() == typeof(ReturnObj)) {
+                    ReturnObj ret = result as ReturnObj;
+                    return ret.value;
+                }
             }
             return result;
         }
