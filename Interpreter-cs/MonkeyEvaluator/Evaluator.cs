@@ -16,7 +16,7 @@ namespace Interpreter_cs.MonkeyEvaluator {
         public ObjectInterface Eval(Node node) {
             switch (node) {
                 case Prog p:
-                    return evalStatements(p.statements);
+                    return evalProgram(p.statements);
                 case IntegerLiteral integ:
                     return new IntegerObj(integ.value);
                 case ExpressionStatement exp:
@@ -31,7 +31,7 @@ namespace Interpreter_cs.MonkeyEvaluator {
                     var r = Eval(infix.rightValue);
                     return evalInfixExpression(infix.operators, l, r);
                 case BlockStatement block:
-                    return evalStatements(block.statements);
+                    return evalBlockStatements(block);
                 case IfExpression ifElse:
                     return evalIfElseExpression(ifElse);
                 case ReturnStatement returnStatement:
@@ -40,14 +40,28 @@ namespace Interpreter_cs.MonkeyEvaluator {
             }
             return References.NULL;
         }
-        private ObjectInterface evalStatements(List<Statement> statement) {
+
+        private ObjectInterface evalBlockStatements(BlockStatement block) {
+            ObjectInterface result = null;
+            
+            foreach (Statement s in block.statements) {
+                result = Eval(s);
+                if (result.GetType() == typeof(ReturnObj)) {
+                    return result;
+                }
+            }
+            return result;
+
+        }
+
+        private ObjectInterface evalProgram(List<Statement> statement) {
             ObjectInterface result = null;
 
             foreach (Statement s in statement) {
                 result = Eval(s);
                 if (result.GetType() == typeof(ReturnObj)) {
-                    ReturnObj ret = result as ReturnObj;
-                    return ret.value;
+                    ReturnObj returnObj = result as ReturnObj;
+                    return returnObj.value;
                 }
             }
             return result;

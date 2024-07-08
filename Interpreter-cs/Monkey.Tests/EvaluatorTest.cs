@@ -140,7 +140,8 @@ public class EvaluatorTest {
         yield return new object[] {"return 10;", 10}; 
         yield return new object[] {"return 10; 9;", 10};
         yield return new object[] {"return 2 * 5; 9;", 10};
-        yield return new object[] {"9; return 2 * 5; 9;", 10}; 
+        yield return new object[] {"9; return 2 * 5; 9;", 10};
+        yield return new object[] {"if (5 < 10) { if (5 < 10) { return 10; } return 1; } ", 10}; 
     }
 
     [Theory]
