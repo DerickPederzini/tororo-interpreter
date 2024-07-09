@@ -49,6 +49,9 @@ namespace Interpreter_cs.MonkeyEvaluator {
                 if (result.GetType() == typeof(ReturnObj)) {
                     return result;
                 }
+                else if (result.GetType() == typeof(ErrorObj)) {
+                    return result;
+                }
             }
             return result;
 
@@ -62,6 +65,9 @@ namespace Interpreter_cs.MonkeyEvaluator {
                 if (result.GetType() == typeof(ReturnObj)) {
                     ReturnObj returnObj = result as ReturnObj;
                     return returnObj.value;
+                } else if (result.GetType() == typeof(ErrorObj)) {
+                    ErrorObj errorObj = result as ErrorObj;
+                    return errorObj;
                 }
             }
             return result;
@@ -82,7 +88,7 @@ namespace Interpreter_cs.MonkeyEvaluator {
                 return evalPrefixOperator(right);
             }
             else {
-                return References.NULL;
+                return ErrorFound($"unknown operator: {operators} {right.ObjectType()}");
             }
         }
 
@@ -104,7 +110,7 @@ namespace Interpreter_cs.MonkeyEvaluator {
 
         private ObjectInterface evalPrefixOperator(ObjectInterface right) {
             if(right.GetType() != typeof(IntegerObj)) {
-                return References.NULL;
+                return ErrorFound("unknown operator: -"+right.ObjectType());
             }
             var val = right as IntegerObj;
             return new IntegerObj(-val.value);
@@ -115,6 +121,9 @@ namespace Interpreter_cs.MonkeyEvaluator {
             if (l is IntegerObj && r is IntegerObj) {
                 return evalInfixInteger(operators, (IntegerObj)l, (IntegerObj)r);
             }
+            else if (l.GetType() != r.GetType()){
+                return ErrorFound($"type mismatch: {l.ObjectType()} {operators} {r.ObjectType()}");
+            }
             else if (operators == "==") {
                 return deciderOnBooleanObj(l == r);
             }
@@ -122,7 +131,7 @@ namespace Interpreter_cs.MonkeyEvaluator {
                 return deciderOnBooleanObj(l != r);
             }
             else {
-                return References.NULL;
+                return ErrorFound($"unknown operator: {l.ObjectType()} {operators} {r.ObjectType()}");
             }
         }
 
@@ -152,7 +161,7 @@ namespace Interpreter_cs.MonkeyEvaluator {
             else if (op == "/"){
                 return new IntegerObj(l.value / r.value);
             }else {
-                return References.NULL;
+                return ErrorFound($"unknown operator: {l.ObjectType()} {op} {r.ObjectType()}");
             }
         }
 
@@ -181,6 +190,11 @@ namespace Interpreter_cs.MonkeyEvaluator {
             }else {
                 return true;
             }
+        }
+
+        private ErrorObj ErrorFound(string format) {
+            Console.WriteLine(format);
+            return new ErrorObj() { message = format }; 
         }
     }
 }

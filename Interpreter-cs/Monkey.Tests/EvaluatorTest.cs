@@ -11,9 +11,7 @@ using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Interpreter_cs.Monkey.Tests;
 public class EvaluatorTest {
-
     public static IEnumerable<object[]> EvaluatorTestData() {
-
         yield return new object[] { "5", (long)5 };
         yield return new object[] { "10", (long)10};
         yield return new object[] { "-5", (long)-5};
@@ -37,7 +35,6 @@ public class EvaluatorTest {
     private ObjectInterface testEval(string input) {
         Lexer lex = new Lexer(input);
         Parser p = new Parser(lex);
-
         Prog program = p.parseProgram(new Prog());
         Evaluator ev = new Evaluator();
 
@@ -52,9 +49,7 @@ public class EvaluatorTest {
         return true;
     }
 
-   
      public static IEnumerable<object[]> EvaluatorBooleanData() {
-
         yield return new object[] { "true", true };
         yield return new object[] { "false", false};
         yield return new object[] { "5 > 5", false};
@@ -86,7 +81,6 @@ public class EvaluatorTest {
         result.value.Should().Be(expected);
         return true;
     }
-
     public static IEnumerable<object[]> bangTest() {
         yield return new object[] { "!true", false};
         yield return new object[] { "!false", true};
@@ -158,4 +152,48 @@ public class EvaluatorTest {
         }
     }
 
+    public static IEnumerable<object[]> errorTest() {
+        yield return new object[] {"5 + true;",
+            "type mismatch: INTEGER + BOOLEAN",
+            };
+        yield return new object[] {
+            "5 + true; 5;",
+            "type mismatch: INTEGER + BOOLEAN",
+        };
+        yield return new object[] {"-true",
+            "unknown operator: -BOOLEAN",
+            };
+        yield return new object[] {
+           "true + false;",
+            "unknown operator: BOOLEAN + BOOLEAN",
+            };
+        yield return new object[] {
+           "5; true + false; 5",
+            "unknown operator: BOOLEAN + BOOLEAN",
+            };
+        yield return new object[] {
+           "if (10 > 1) { true + false; }",
+           "unknown operator: BOOLEAN + BOOLEAN",
+            };
+        yield return new object[] {"""
+           if (10 > 1) {
+            if (10 > 1) {
+                return true + false;
+            }
+            return 1;
+        }
+        """,
+        "unknown operator: BOOLEAN + BOOLEAN",
+        };
+    }
+
+    [Theory]
+    [MemberData(nameof(errorTest))]
+    public void testErrorMessages(string input, string message) {
+        var evaluated = testEval(input);
+        evaluated.Should().NotBeNull();
+        var errorObj = evaluated as ErrorObj;
+        errorObj.Should().NotBeNull();
+        errorObj.message.Should().Be(message);
+    }
 }

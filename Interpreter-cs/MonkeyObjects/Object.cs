@@ -1,15 +1,17 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Interpreter_cs.MonkeyObjects;
 
 public readonly record struct Type(string type) {
-    internal static Type Integer_OBJ = new("Integer");
-    internal static Type BOOL_OBJ = new("Boolean");
-    internal static Type NULL_OBJ = new("null");
-    internal static Type RETURN_OBJ = new("return");
+    internal static string Integer_OBJ = "INTEGER";
+    internal static string BOOL_OBJ = "BOOLEAN";
+    internal static string NULL_OBJ = "NULL";
+    internal static string RETURN_OBJ = "RETURN";
+    internal static string ERROR_OBJ = "ERROR";
 }
 public interface ObjectInterface {
-    Type ObjectType();
+    string ObjectType();
     public string Inspect();
 }
 
@@ -18,7 +20,7 @@ public class IntegerObj(long val) : ObjectInterface {
     public string Inspect() {
         return value.ToString();
     }
-    public Type ObjectType() {
+    public string ObjectType() {
         return Type.Integer_OBJ;
     }
 }
@@ -28,7 +30,7 @@ public class BooleanObj(bool val) : ObjectInterface {
     public string Inspect() {
         return value.ToString().ToLower();
     }
-    public Type ObjectType() {
+    public string ObjectType() {
         return Type.BOOL_OBJ;
     }
 }
@@ -37,7 +39,7 @@ public class NullObj() : ObjectInterface {
     public string Inspect() {
         return "null";
     }
-    public Type ObjectType() {
+    public string ObjectType() {
         return Type.NULL_OBJ;
     }
 }
@@ -49,8 +51,21 @@ public class ReturnObj(ObjectInterface val) : ObjectInterface {
         return value.ToString().ToLower();
     }
 
-    public Type ObjectType() {
+    public string ObjectType() {
         return Type.RETURN_OBJ;
     }
+}
+
+public class ErrorObj() : ObjectInterface {
+    internal string message;
+
+    public string Inspect() {
+        return "ERROR: "+ message;
+    }
+    
+    public string ObjectType() {
+        return Type.ERROR_OBJ;
+    }
+
 }
 
