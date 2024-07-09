@@ -2,7 +2,9 @@
 using Interpreter_cs.MonkeyAST;
 using Interpreter_cs.MonkeyObjects;
 using System.Linq.Expressions;
+using System.Runtime.Remoting;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+using Type = Interpreter_cs.MonkeyObjects.Type;
 
 namespace Interpreter_cs.MonkeyEvaluator {
     public class Evaluator {
@@ -25,10 +27,19 @@ namespace Interpreter_cs.MonkeyEvaluator {
                     return deciderOnBooleanObj(boole.value);
                 case PrefixExpression exp:
                     var right = Eval(exp.right);
+                    if (isError(right)) {
+                        return right;
+                    }
                     return evalPrefixExpression(exp.operators, right);
                 case InfixExpression infix:
                     var l = Eval(infix.leftValue);
+                    if (isError(l)) {
+                        return l;
+                    }
                     var r = Eval(infix.rightValue);
+                    if (isError(r)) {
+                        return r;
+                    }
                     return evalInfixExpression(infix.operators, l, r);
                 case BlockStatement block:
                     return evalBlockStatements(block);
@@ -36,9 +47,19 @@ namespace Interpreter_cs.MonkeyEvaluator {
                     return evalIfElseExpression(ifElse);
                 case ReturnStatement returnStatement:
                     var ret = Eval(returnStatement.value);
+                    if (isError(ret)) {
+                        return ret;
+                    }
                     return new ReturnObj(ret);
             }
             return References.NULL;
+        }
+
+        private bool isError(ObjectInterface obj) {
+            if(obj != null) {
+                return obj.ObjectType() == Type.ERROR_OBJ;
+            }
+            return false;
         }
 
         private ObjectInterface evalBlockStatements(BlockStatement block) {
@@ -168,6 +189,9 @@ namespace Interpreter_cs.MonkeyEvaluator {
         private ObjectInterface evalIfElseExpression(IfExpression ifExp) {
 
             var condition = Eval(ifExp.condition);
+            if (isError(condition)) {
+                return condition;
+            }
             if (isTruthy(condition)) {
                 return Eval(ifExp.consequence);
             }
