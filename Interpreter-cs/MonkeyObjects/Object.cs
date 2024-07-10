@@ -48,11 +48,9 @@ public class NullObj() : ObjectInterface {
 
 public class ReturnObj(ObjectInterface val) : ObjectInterface {
     internal ObjectInterface value = val;
-
     public string Inspect() {
         return value.ToString().ToLower();
     }
-
     public string ObjectType() {
         return Type.RETURN_OBJ;
     }
@@ -60,23 +58,18 @@ public class ReturnObj(ObjectInterface val) : ObjectInterface {
 
 public class ErrorObj() : ObjectInterface {
     internal string message;
-
     public string Inspect() {
         return "ERROR: "+ message;
     }
-    
     public string ObjectType() {
         return Type.ERROR_OBJ;
     }
-
 }
 
 public class FunctionLiteral() : ObjectInterface {
-
-    List<Identifier> parameters = new List<Identifier>();
-    BlockStatement body;
-    MkEnvironment env;
-
+    internal List<Identifier> parameters = new List<Identifier>();
+    internal BlockStatement body;
+    internal MkEnvironment env;
     public string Inspect() {
         List<string> param = new List<string>();
 
@@ -84,7 +77,6 @@ public class FunctionLiteral() : ObjectInterface {
             param.Add(s.ToString());
         }
         return $"fn({string.Join(param.ToString(), ",")})"+"{\n"+body.ToString()+"\n}";
-
     }
 
     public string ObjectType() {

@@ -59,6 +59,13 @@ namespace Interpreter_cs.MonkeyEvaluator {
                     return env.environment[letstmt.name.identValue] = val;
                 case Identifier ident:
                     return evalIdentifier(ident, env);
+                case FunctionExpression fn:
+
+                    List<Identifier> param = fn.parameters;
+                    var body = fn.functionBody;
+                    MkEnvironment fnEnv = new MkEnvironment();
+                    return new FunctionLiteral() { parameters = param, env = fnEnv, body = body };
+
             }
             return References.NULL;
         }

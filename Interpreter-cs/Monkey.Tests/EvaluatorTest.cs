@@ -215,4 +215,16 @@ public class EvaluatorTest {
         testIntegerObject(evaluated, (long)integer);
     }
 
+    [Fact]
+    public void testFunctionEvaluation() {
+        string input = "fn(x) {x + 2;}";
+        var evaluated = testEval(input);
+        evaluated.Should().NotBeNull();
+        var fn = evaluated as FunctionLiteral;
+        fn.parameters.Count.Should().Be(1);
+        fn.parameters[0].identValue.Should().Be("x");
+        string expectedBody = "(x + 2)";
+        fn.body.ToString().Should().Be(expectedBody);
+    }
+
 }
