@@ -37,8 +37,9 @@ public class EvaluatorTest {
         Parser p = new Parser(lex);
         Prog program = p.parseProgram(new Prog());
         Evaluator ev = new Evaluator();
+        MkEnvironment env = new MkEnvironment();
 
-        return ev.Eval(program);
+        return ev.Eval(program, env);
     }
 
     private bool testIntegerObject(ObjectInterface eval, long expectedVal) {
@@ -185,6 +186,7 @@ public class EvaluatorTest {
         """,
         "unknown operator: BOOLEAN + BOOLEAN",
         };
+        yield return new object[] { "foobar", "identifier not found: foobar" };
     }
 
     [Theory]
@@ -196,4 +198,21 @@ public class EvaluatorTest {
         errorObj.Should().NotBeNull();
         errorObj.message.Should().Be(message);
     }
+
+    public static IEnumerable<object[]> letTest() {
+        yield return new object[] {"let x = 5; x;", 5 };
+        yield return new object[] {"let x = 5 * 5; x;", 25 };
+        yield return new object[] {"let a = 5; let b = a; b;", 5 };
+        yield return new object[] {"let a = 5; let b = a; let c = a + b * 5; c;", 30 };
+    }
+
+    [Theory]
+    [MemberData(nameof(letTest))]
+    public void testLetEvaluation(string input, object expected) {
+        var evaluated = testEval(input);
+        evaluated.Should().NotBeNull();
+        var integer = Convert.ToInt64(expected);
+        testIntegerObject(evaluated, (long)integer);
+    }
+
 }

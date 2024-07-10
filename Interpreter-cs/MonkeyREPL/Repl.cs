@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Interpreter_cs.MonkeyEvaluator;
 using Interpreter_cs.MonkeyLexer.Token;
+using Interpreter_cs.MonkeyObjects;
 using Interpreter_cs.MonkeyParser;
 using System.Collections;
 
@@ -13,6 +14,8 @@ public class Repl {
     public void startReader() {
 
         try {
+
+            MkEnvironment env = new MkEnvironment();
 
             while (true) {
                 Console.Write(PROMPT);
@@ -31,7 +34,7 @@ public class Repl {
                 }
 
                 Evaluator eval = new Evaluator();
-                var evalueated = eval.Eval(program);
+                var evalueated = eval.Eval(program, env);
                 evalueated.Should().NotBeNull();
 
                 Console.WriteLine(evalueated.Inspect()+"\n");

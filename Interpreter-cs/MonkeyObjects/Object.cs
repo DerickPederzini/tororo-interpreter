@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+﻿using Interpreter_cs.MonkeyAST;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Interpreter_cs.MonkeyObjects;
@@ -9,6 +10,7 @@ public readonly record struct Type(string type) {
     internal static string NULL_OBJ = "NULL";
     internal static string RETURN_OBJ = "RETURN";
     internal static string ERROR_OBJ = "ERROR";
+    internal static string FUNCTION_OBJ = "FUNCTION";
 }
 public interface ObjectInterface {
     string ObjectType();
@@ -67,5 +69,26 @@ public class ErrorObj() : ObjectInterface {
         return Type.ERROR_OBJ;
     }
 
+}
+
+public class FunctionLiteral() : ObjectInterface {
+
+    List<Identifier> parameters = new List<Identifier>();
+    BlockStatement body;
+    MkEnvironment env;
+
+    public string Inspect() {
+        List<string> param = new List<string>();
+
+        foreach(var s in parameters) {
+            param.Add(s.ToString());
+        }
+        return $"fn({string.Join(param.ToString(), ",")})"+"{\n"+body.ToString()+"\n}";
+
+    }
+
+    public string ObjectType() {
+        return Type.FUNCTION_OBJ;
+    }
 }
 

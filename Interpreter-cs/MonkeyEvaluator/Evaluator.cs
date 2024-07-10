@@ -15,44 +15,63 @@ namespace Interpreter_cs.MonkeyEvaluator {
             internal static readonly BooleanObj FALSE = new BooleanObj(false);
         }
 
-        public ObjectInterface Eval(Node node) {
+        public ObjectInterface Eval(Node node, MkEnvironment env) {
             switch (node) {
                 case Prog p:
-                    return evalProgram(p.statements);
+                    return evalProgram(p.statements, env);
                 case IntegerLiteral integ:
                     return new IntegerObj(integ.value);
                 case ExpressionStatement exp:
-                    return Eval(exp.expression);
+                    return Eval(exp.expression, env);
                 case Bool boole:
                     return deciderOnBooleanObj(boole.value);
                 case PrefixExpression exp:
-                    var right = Eval(exp.right);
+                    var right = Eval(exp.right, env);
                     if (isError(right)) {
                         return right;
                     }
                     return evalPrefixExpression(exp.operators, right);
                 case InfixExpression infix:
-                    var l = Eval(infix.leftValue);
+                    var l = Eval(infix.leftValue, env);
                     if (isError(l)) {
                         return l;
                     }
-                    var r = Eval(infix.rightValue);
+                    var r = Eval(infix.rightValue, env);
                     if (isError(r)) {
                         return r;
                     }
                     return evalInfixExpression(infix.operators, l, r);
                 case BlockStatement block:
-                    return evalBlockStatements(block);
+                    return evalBlockStatements(block, env);
                 case IfExpression ifElse:
-                    return evalIfElseExpression(ifElse);
+                    return evalIfElseExpression(ifElse, env);
                 case ReturnStatement returnStatement:
-                    var ret = Eval(returnStatement.value);
+                    var ret = Eval(returnStatement.value, env);
                     if (isError(ret)) {
                         return ret;
                     }
                     return new ReturnObj(ret);
+                case LetStatement letstmt:
+                    var val = Eval(letstmt.value, env);
+                    if (isError(val)) {
+                        return val;
+                    }
+                    return env.environment[letstmt.name.identValue] = val;
+                case Identifier ident:
+                    return evalIdentifier(ident, env);
             }
             return References.NULL;
+        }
+
+        private ObjectInterface evalIdentifier(Identifier ident, MkEnvironment env) {
+            try {
+                var val = env.environment[ident.identValue];
+                val.Should().NotBeNull();
+                return val;
+            }
+            catch (Exception e) {
+                return ErrorFound("identifier not found: "+ident.identValue);
+            }
         }
 
         private bool isError(ObjectInterface obj) {
@@ -62,11 +81,11 @@ namespace Interpreter_cs.MonkeyEvaluator {
             return false;
         }
 
-        private ObjectInterface evalBlockStatements(BlockStatement block) {
+        private ObjectInterface evalBlockStatements(BlockStatement block, MkEnvironment env) {
             ObjectInterface result = null;
             
             foreach (Statement s in block.statements) {
-                result = Eval(s);
+                result = Eval(s, env);
                 if (result.GetType() == typeof(ReturnObj)) {
                     return result;
                 }
@@ -78,11 +97,11 @@ namespace Interpreter_cs.MonkeyEvaluator {
 
         }
 
-        private ObjectInterface evalProgram(List<Statement> statement) {
+        private ObjectInterface evalProgram(List<Statement> statement, MkEnvironment env) {
             ObjectInterface result = null;
 
             foreach (Statement s in statement) {
-                result = Eval(s);
+                result = Eval(s, env);
                 if (result.GetType() == typeof(ReturnObj)) {
                     ReturnObj returnObj = result as ReturnObj;
                     return returnObj.value;
@@ -186,17 +205,17 @@ namespace Interpreter_cs.MonkeyEvaluator {
             }
         }
 
-        private ObjectInterface evalIfElseExpression(IfExpression ifExp) {
+        private ObjectInterface evalIfElseExpression(IfExpression ifExp, MkEnvironment env) {
 
-            var condition = Eval(ifExp.condition);
+            var condition = Eval(ifExp.condition, env);
             if (isError(condition)) {
                 return condition;
             }
             if (isTruthy(condition)) {
-                return Eval(ifExp.consequence);
+                return Eval(ifExp.consequence, env);
             }
             else if (ifExp.alternative != null) {
-                return Eval(ifExp.alternative);
+                return Eval(ifExp.alternative, env);
             }
             else {
                 return References.NULL;
