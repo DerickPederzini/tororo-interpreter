@@ -227,4 +227,19 @@ public class EvaluatorTest {
         fn.body.ToString().Should().Be(expectedBody);
     }
 
+    public static IEnumerable<object[]> testFnApp() {
+        yield return new object[] { "let identity = fn(x) { x; }; identity(5);", 5 };
+        yield return new object[] { "let identity = fn(x) { return x; }; identity(5);", 5 };
+        yield return new object[] { "let double = fn(x) { x * 2; }; double(5);", 10 };
+        yield return new object[] { "let add = fn(x, y) { x + y; }; add(5, 5);", 10 };
+        yield return new object[] { "let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20 };
+        yield return new object[] { "fn(x) { x; };(5);", 5 };
+    }
+
+    [Theory]
+    [MemberData(nameof(testFnApp))]
+    public void testFnApplication(string input, long expected) {
+        var evaluated = testEval(input);
+        testIntegerObject(evaluated, expected);
+    }
 }

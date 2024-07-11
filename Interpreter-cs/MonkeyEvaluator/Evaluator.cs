@@ -60,14 +60,49 @@ namespace Interpreter_cs.MonkeyEvaluator {
                 case Identifier ident:
                     return evalIdentifier(ident, env);
                 case FunctionExpression fn:
-
                     List<Identifier> param = fn.parameters;
                     var body = fn.functionBody;
                     MkEnvironment fnEnv = new MkEnvironment();
                     return new FunctionLiteral() { parameters = param, env = fnEnv, body = body };
+                case CallExpression call:
+                    var func = Eval(call.identifierExpression, env);
+                    if (isError(func)) {
+                        return func;
+                    }
 
+                    var arg = evalExpression(call.arguments, env);
+                    if(arg.Count == 1 && isError(arg[0])) {
+                        return arg[0];
+                    }
+
+                    var fnt = func as FunctionLiteral;
+                    fnt.Should().NotBeNull();
+                    var newEnv = env.newEnclosedEnvironment(env);
+                    for (int i = 0; i < fnt.parameters.Count; i++) {
+                        newEnv.environment[fnt.parameters[i].identValue] = arg[i];
+                    }
+
+                    var eval = Eval(fnt.body, newEnv);
+                    if (eval is ReturnObj) {
+                        var ev = eval as ReturnObj;
+                        return ev.value;
+                    }
+                    return eval;
+                default:
+                    return References.NULL;
             }
-            return References.NULL;
+        }
+
+        private List<ObjectInterface> evalExpression(List<MonkeyAST.Expression> exp, MkEnvironment env) {
+            var result = new List<ObjectInterface>();
+            foreach(var e in exp) {
+                var evaluate = Eval(e, env);
+                if (isError(evaluate)) {
+                    return new List<ObjectInterface>() { evaluate };
+                }
+                result.Add(evaluate);
+            }
+            return result;
         }
 
         private ObjectInterface evalIdentifier(Identifier ident, MkEnvironment env) {
