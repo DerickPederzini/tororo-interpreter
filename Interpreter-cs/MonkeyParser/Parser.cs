@@ -46,6 +46,7 @@ public class Parser {
 
         registerPrefix(TokenType.FUNCTION, parseFunctionExpression);
         registerInfix(TokenType.LPAREN, parseCallExpression);
+        registerPrefix(TokenType.STRING, parseStringLiteral);
     }
     //precedences
     enum Precedences {
@@ -368,7 +369,11 @@ public class Parser {
             return null;
         }
         return args;
-    }  
+    }
+    
+    private Expression parseStringLiteral() {
+        return new StringExpression(currentToken, currentToken.Literal);
+    }
 
     public bool expectedPeek(TokenType type) {
         if (nextTokenIs(type)) {

@@ -1,4 +1,6 @@
 ﻿
+using System.Runtime.CompilerServices;
+
 namespace Interpreter_cs.MonkeyLexer.Token;
 
 public enum TokenType {
@@ -41,9 +43,10 @@ public enum TokenType {
     TRUE,
     FALSE,
 
+    STRING,
 }
 
-public readonly record struct Token(TokenType Type, string Literal) {
+public record struct Token(TokenType Type, string Literal) {
 
     internal static Token Illegal = new(TokenType.ILLEGAL, "ILLEGAL");
     internal static Token EOF = new(TokenType.EOF, "\0");
@@ -74,6 +77,8 @@ public readonly record struct Token(TokenType Type, string Literal) {
 
     internal static Token EQUAL = new(TokenType.EQUAL, "==");
     internal static Token NOTEQUAL = new(TokenType.NOTEQUAL, "!=");
+    
+    internal static Token STRING = new(TokenType.STRING, "STRING");
 
 }
 

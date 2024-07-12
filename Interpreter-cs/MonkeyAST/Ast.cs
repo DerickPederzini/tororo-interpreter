@@ -220,13 +220,25 @@ public class CallExpression(Token tok) : Expression {
     }
 
     public override string ToString() {
-
         List<string> args = new List<string>();
 
         foreach (var statement in arguments) {
             args.Add(statement.ToString());
         }
         return $"{identifierExpression.ToString()}({string.Join(args.ToString(), ", ")})";
+    }
+}
+
+public class StringExpression(Token tok, string val) : Expression {
+    internal Token token = tok;
+    internal string value = val;
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+
+    public override string ToString() {
+        return value;
     }
 }
 

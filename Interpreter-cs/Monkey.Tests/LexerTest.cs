@@ -25,6 +25,8 @@ public class LexerTest {
             }
             10 == 10;
             9 != 10;    
+            "foobar"
+            "foo bar"
             """;
 
         var lexer = new Lexer(testInput);
@@ -104,12 +106,16 @@ public class LexerTest {
             new(TokenType.NOTEQUAL, "!="),
             new(TokenType.INT, "10"),
             new(TokenType.SEMICOLON, ";"),
-
+            new(TokenType.STRING, "foobar"),
+            new(TokenType.STRING, "foo bar"),
 
             new(TokenType.EOF, "\0"),
         };
 
         foreach (var token in tokens) {
+            if (token.Type == TokenType.STRING) {
+                Console.WriteLine();
+            }
             var nextToken = lexer.nextToken();
             token.Should().Be(nextToken);
         }

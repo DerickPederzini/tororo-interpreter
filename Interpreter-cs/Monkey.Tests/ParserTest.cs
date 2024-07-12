@@ -420,6 +420,24 @@ public class ParserTest {
         testInfixExpression(exp.arguments[2], 4, "+" ,5);
     }
 
+    [Fact]
+    public void testStringExpression() {
+        string h = "\"hello world\";";
+        string input = h;
+        Lexer lexer = new Lexer(input);
+        Parser p = new Parser(lexer);
+        Prog program = p.parseProgram(new Prog());
+        program.Should().NotBeNull();
+        checkParserErrors(p);
+
+        var stmt = program.statements[0] as ExpressionStatement;
+        stmt.Should().NotBeNull();
+        var exp = stmt.expression as StringExpression;
+        exp.Should().NotBeNull();
+
+        exp.value.Should().Be("hello world");
+    }
+
     public bool testIntegerLiteral(Expression exp, long value) {
         var integ = exp as IntegerLiteral;
 

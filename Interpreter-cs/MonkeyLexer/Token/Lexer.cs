@@ -115,7 +115,11 @@ public class Lexer
                 tokens = Token.NOT;
             
         }
-
+        else if (currentCharacter == '"') {
+            tokens = Token.STRING;
+            tokens.Literal = readString();
+            return tokens;
+        }
         else if (Char.IsLetter(currentCharacter))
         {
             //this is a very cool way of doing switches
@@ -175,6 +179,18 @@ public class Lexer
             readCharacter();
         }
         return input[currentPosition..position];
+    }
+
+    private string readString() {
+        int cPosition = position + 1;
+        readCharacter();
+        while (true) {
+            readCharacter();
+            if (currentCharacter == '"' || currentCharacter == '\0') {
+                break;
+            }
+        }
+        return input[cPosition..position];
     }
 
 }
