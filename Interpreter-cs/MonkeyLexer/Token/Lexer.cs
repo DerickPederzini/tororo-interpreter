@@ -118,7 +118,6 @@ public class Lexer
         else if (currentCharacter == '"') {
             tokens = Token.STRING;
             tokens.Literal = readString();
-            return tokens;
         }
         else if (Char.IsLetter(currentCharacter))
         {
@@ -183,7 +182,6 @@ public class Lexer
 
     private string readString() {
         int cPosition = position + 1;
-        readCharacter();
         while (true) {
             readCharacter();
             if (currentCharacter == '"' || currentCharacter == '\0') {

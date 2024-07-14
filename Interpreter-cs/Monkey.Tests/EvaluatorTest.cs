@@ -187,6 +187,7 @@ public class EvaluatorTest {
         "unknown operator: BOOLEAN + BOOLEAN",
         };
         yield return new object[] { "foobar", "identifier not found: foobar" };
+        yield return new object[] { " \"Hello\" - \"World\"", "unknown operator: STRING - STRING" };
     }
 
     [Theory]
@@ -241,5 +242,16 @@ public class EvaluatorTest {
     public void testFnApplication(string input, long expected) {
         var evaluated = testEval(input);
         testIntegerObject(evaluated, expected);
+    }
+
+    [Fact]
+    public void testStringContatenation() {
+        string input = "\"Hello\" + \" \" + \"World\"";
+        var evaluated = testEval(input);
+        evaluated.Should().NotBeNull();
+        var str = evaluated as StringObj;
+        str.Should().NotBeNull();
+        str.value.Should().Be("Hello World");
+
     }
 }

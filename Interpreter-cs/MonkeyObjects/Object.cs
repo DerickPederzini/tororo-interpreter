@@ -11,6 +11,7 @@ public readonly record struct Type(string type) {
     internal static string RETURN_OBJ = "RETURN";
     internal static string ERROR_OBJ = "ERROR";
     internal static string FUNCTION_OBJ = "FUNCTION";
+    internal static string STRING_OBJ = "STRING";
 }
 public interface ObjectInterface {
     string ObjectType();
@@ -84,3 +85,14 @@ public class FunctionLiteral() : ObjectInterface {
     }
 }
 
+public class StringObj(string val) : ObjectInterface {
+    internal string value = val;
+
+    public string Inspect() {
+        return value;
+    }
+
+    public string ObjectType() {
+        return Type.STRING_OBJ;
+    }
+}

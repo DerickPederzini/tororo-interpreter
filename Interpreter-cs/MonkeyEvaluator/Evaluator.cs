@@ -21,6 +21,8 @@ namespace Interpreter_cs.MonkeyEvaluator {
                     return evalProgram(p.statements, env);
                 case IntegerLiteral integ:
                     return new IntegerObj(integ.value);
+                case StringExpression str:
+                    return new StringObj(str.value);
                 case ExpressionStatement exp:
                     return Eval(exp.expression, env);
                 case Bool boole:
@@ -203,6 +205,9 @@ namespace Interpreter_cs.MonkeyEvaluator {
             if (l is IntegerObj && r is IntegerObj) {
                 return evalInfixInteger(operators, (IntegerObj)l, (IntegerObj)r);
             }
+            else if (l is StringObj && r is StringObj) {
+                return evalInfixString(operators, (StringObj)l, (StringObj)r);
+            }
             else if (l.GetType() != r.GetType()){
                 return ErrorFound($"type mismatch: {l.ObjectType()} {operators} {r.ObjectType()}");
             }
@@ -214,6 +219,21 @@ namespace Interpreter_cs.MonkeyEvaluator {
             }
             else {
                 return ErrorFound($"unknown operator: {l.ObjectType()} {operators} {r.ObjectType()}");
+            }
+        }
+
+        private ObjectInterface evalInfixString(string op, StringObj l, StringObj r) {
+            if (op == "+") {
+                return new StringObj(l.value + r.value);
+            }
+            else if (op == "==") {
+                return deciderOnBooleanObj(l.value == r.value);
+            }
+            else if (op == "!=") {
+                return deciderOnBooleanObj(l.value != r.value);
+            }
+            else {
+                return ErrorFound($"unknown operator: {l.ObjectType()} {op} {r.ObjectType()}");
             }
         }
 
