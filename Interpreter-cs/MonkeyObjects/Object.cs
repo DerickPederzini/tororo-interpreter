@@ -1,5 +1,7 @@
 ﻿using Interpreter_cs.MonkeyAST;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using System.Runtime.Remoting;
+using System.Security.AccessControl;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Interpreter_cs.MonkeyObjects;
@@ -12,6 +14,7 @@ public readonly record struct Type(string type) {
     internal static string ERROR_OBJ = "ERROR";
     internal static string FUNCTION_OBJ = "FUNCTION";
     internal static string STRING_OBJ = "STRING";
+    internal static string BUILDIN_OBJ = "BUILDIN";
 }
 public interface ObjectInterface {
     string ObjectType();
@@ -94,5 +97,35 @@ public class StringObj(string val) : ObjectInterface {
 
     public string ObjectType() {
         return Type.STRING_OBJ;
+    }
+}
+
+public delegate ObjectInterface BuildInFunction(params ObjectInterface[] obj);
+
+public class Builds() {
+    public static ObjectInterface len(ObjectInterface [] obj) {
+
+        if(obj.Length != 1) {
+            return new ErrorObj() { message = "wrong number of arguments. got=" + obj.Length +", want=1" };
+        }
+
+        switch (obj[0]) {
+            case StringObj str:
+                return new IntegerObj(str.value.Length);
+            default:
+                return new ErrorObj() { message = "argument to len not supported, got " + obj[0].ObjectType() };
+        }
+   }
+}
+public class BuildIn : ObjectInterface {
+
+    internal BuildInFunction fn;
+
+    public string Inspect() {
+        return "buildin function";
+    }
+
+    public string ObjectType() {
+        return Type.BUILDIN_OBJ;
     }
 }

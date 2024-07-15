@@ -252,6 +252,31 @@ public class EvaluatorTest {
         var str = evaluated as StringObj;
         str.Should().NotBeNull();
         str.value.Should().Be("Hello World");
+    }
 
+    public static IEnumerable<object[]> testBuildinLen() {
+        yield return new object[] {"len(\"\")", 0};
+        yield return new object[] { "len(\"four\")", 4};
+        yield return new object[] { "len(\"hello world\")", 11};
+        yield return new object[] { "len(1)", "argument to len not supported, got INTEGER"};
+        yield return new object[] { "len(\"one\", \"two\")", "wrong number of arguments. got=2, want=1"};
+    }
+
+    [Theory]
+    [MemberData(nameof(testBuildinLen))]
+    public void testBuildInLenApp(string input, object expected) {
+        var evaluated = testEval(input);
+
+        switch (expected) {
+            case int integer:
+                testIntegerObject(evaluated, integer);
+                break;
+            case string str:
+                var errorObj = evaluated as ErrorObj;
+                errorObj.Should().NotBeNull();
+                Assert.IsInstanceOfType(errorObj, typeof(ErrorObj), "Object is not an error object");
+                errorObj.message.Should().Be(str);
+                break;
+        }
     }
 }

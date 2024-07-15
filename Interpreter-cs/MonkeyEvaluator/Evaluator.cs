@@ -3,6 +3,7 @@ using Interpreter_cs.MonkeyAST;
 using Interpreter_cs.MonkeyObjects;
 using System.Linq.Expressions;
 using System.Runtime.Remoting;
+using System.Text.Json;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 using Type = Interpreter_cs.MonkeyObjects.Type;
 
@@ -67,6 +68,7 @@ namespace Interpreter_cs.MonkeyEvaluator {
                     MkEnvironment fnEnv = new MkEnvironment();
                     return new FunctionLiteral() { parameters = param, env = fnEnv, body = body };
                 case CallExpression call:
+
                     var func = Eval(call.identifierExpression, env);
                     if (isError(func)) {
                         return func;
@@ -76,23 +78,41 @@ namespace Interpreter_cs.MonkeyEvaluator {
                     if(arg.Count == 1 && isError(arg[0])) {
                         return arg[0];
                     }
-
-                    var fnt = func as FunctionLiteral;
-                    fnt.Should().NotBeNull();
-                    var newEnv = env.newEnclosedEnvironment(env);
-                    for (int i = 0; i < fnt.parameters.Count; i++) {
-                        newEnv.environment[fnt.parameters[i].identValue] = arg[i];
-                    }
-
-                    var eval = Eval(fnt.body, newEnv);
-                    if (eval is ReturnObj) {
-                        var ev = eval as ReturnObj;
-                        return ev.value;
-                    }
-                    return eval;
+                    
+                    return applyFunction(func, env, arg);
                 default:
                     return References.NULL;
             }
+        }
+
+        private ObjectInterface applyFunction(ObjectInterface fn, MkEnvironment env, List<ObjectInterface> arg) {
+            switch (fn) {
+                case FunctionLiteral func:
+                    var newEnv = extendEnv(env, func, arg);
+                    var eval = Eval(func.body, newEnv);
+                    return unwrapValue(eval);
+                case BuildIn bdin:
+                    return bdin.fn(arg.ToArray());
+                default: 
+                    return fn;
+            }
+        }
+
+        private ObjectInterface unwrapValue(ObjectInterface obj) {
+            if(obj is ReturnObj) {
+                var ev = obj as ReturnObj;
+                return ev.value;
+            }
+            return obj;
+        }
+
+        private MkEnvironment extendEnv(MkEnvironment env, FunctionLiteral fn, List<ObjectInterface> arg ) {
+            var newEnv = env.newEnclosedEnvironment(env);
+
+            for(int i = 0; i < fn.parameters.Count; i++) {
+                newEnv.environment[fn.parameters[i].identValue] = arg[i];
+            }
+            return newEnv;
         }
 
         private List<ObjectInterface> evalExpression(List<MonkeyAST.Expression> exp, MkEnvironment env) {
@@ -109,7 +129,12 @@ namespace Interpreter_cs.MonkeyEvaluator {
 
         private ObjectInterface evalIdentifier(Identifier ident, MkEnvironment env) {
             try {
-                var val = env.environment[ident.identValue];
+                env.environment.TryGetValue(ident.identValue, out var val);
+                if(val != null) {
+                    return val;
+                }
+                Builtins builtins = new Builtins();
+                val = builtins.builtins[ident.identValue];
                 val.Should().NotBeNull();
                 return val;
             }
