@@ -279,4 +279,18 @@ public class EvaluatorTest {
                 break;
         }
     }
+
+    [Fact]
+    public void testArrayLiterals() {
+        string input = "[1, 2 * 2, 3 + 3]";
+        var evaluated = testEval(input);
+        evaluated.Should().NotBeNull();
+        var result = evaluated as ArrayObj;
+        result.Should().NotBeNull();
+        result.list.Count.Should().Be(3);
+
+        testIntegerObject(result.list[0], 1);
+        testIntegerObject(result.list[1], 4);
+        testIntegerObject(result.list[2], 6);
+    }
 }

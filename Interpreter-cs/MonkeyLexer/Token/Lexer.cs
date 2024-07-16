@@ -45,8 +45,7 @@ public class Lexer
 
     }
 
-    public Token nextToken()
-    {
+    public Token nextToken() {
         SkipWhiteSpaces();
 
         Token tokens;
@@ -87,33 +86,33 @@ public class Lexer
         else if (currentCharacter == '<')
             tokens = Token.LANGLE;
 
-        else if (currentCharacter == '=')
-        {
+        else if (currentCharacter == '=') {
             char charAfterCurrent = peakChar();
 
-            if (charAfterCurrent == '=')
-            {
+            if (charAfterCurrent == '=') {
                 tokens = Token.EQUAL;
                 readCharacter();
             }
-            else 
+            else
                 tokens = Token.ASSIGN;
-            
-
         }
-        else if (currentCharacter == '!')
-        {
+        else if (currentCharacter == '!') {
             char charAfterCurrent = peakChar();
 
-            if (charAfterCurrent == '=')
-            {
+            if (charAfterCurrent == '=') {
                 tokens = Token.NOTEQUAL;
                 readCharacter();
             }
 
-            else 
+            else
                 tokens = Token.NOT;
-            
+
+        }
+        else if (currentCharacter == '[') {
+            tokens = Token.LBRACKET;
+        } 
+        else if (currentCharacter == ']') {
+            tokens = Token.RBRACKET;
         }
         else if (currentCharacter == '"') {
             tokens = Token.STRING;

@@ -27,6 +27,7 @@ public class LexerTest {
             9 != 10;    
             "foobar"
             "foo bar"
+            [1 ,2];
             """;
 
         var lexer = new Lexer(testInput);
@@ -108,6 +109,12 @@ public class LexerTest {
             new(TokenType.SEMICOLON, ";"),
             new(TokenType.STRING, "foobar"),
             new(TokenType.STRING, "foo bar"),
+            new(TokenType.LBRACKET, "["),
+            new(TokenType.INT, "1"),
+            new(TokenType.COMMA, ","),
+            new(TokenType.INT, "2"),
+            new(TokenType.RBRACKET, "]"),
+            new(TokenType.SEMICOLON, ";"),
 
             new(TokenType.EOF, "\0"),
         };

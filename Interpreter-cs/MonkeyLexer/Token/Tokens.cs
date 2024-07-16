@@ -11,6 +11,7 @@ public enum TokenType {
 
     //IDENTIFIERS + LITERAL TYPES
     INT,
+    STRING,
     IDENT,
 
     //OPERATORS
@@ -42,8 +43,9 @@ public enum TokenType {
     RETURN,
     TRUE,
     FALSE,
-
-    STRING,
+    
+    LBRACKET,
+    RBRACKET,
 }
 
 public record struct Token(TokenType Type, string Literal) {
@@ -79,6 +81,10 @@ public record struct Token(TokenType Type, string Literal) {
     internal static Token NOTEQUAL = new(TokenType.NOTEQUAL, "!=");
     
     internal static Token STRING = new(TokenType.STRING, "STRING");
+
+    internal static Token LBRACKET = new(TokenType.LBRACKET, "[");
+    internal static Token RBRACKET = new(TokenType.RBRACKET, "]");
+
 
 }
 

@@ -7,6 +7,7 @@ using Interpreter_cs.MonkeyParser;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Data;
+using System.Net.Mail;
 using System.Net.WebSockets;
 using System.Security.Principal;
 using Xunit;
@@ -434,8 +435,44 @@ public class ParserTest {
         stmt.Should().NotBeNull();
         var exp = stmt.expression as StringExpression;
         exp.Should().NotBeNull();
-
         exp.value.Should().Be("hello world");
+    }
+
+    [Fact]
+    public void testArrayLiteralParsing() {
+        string input = "[1, 2 * 2, 3 + 3]";
+
+        Lexer lex = new Lexer(input);
+        Parser p = new Parser(lex);
+        Prog program = p.parseProgram(new Prog());
+        program.Should().NotBeNull();
+        checkParserErrors(p);
+
+        var stmt = program.statements[0] as ExpressionStatement;
+        var arr = stmt.expression as ArrayLiteral;
+        arr.Should().NotBeNull();
+        arr.Elements.Count.Should().Be(3);
+        testIntegerLiteral(arr.Elements[0], 1);
+        testInfixExpression(arr.Elements[1], 2, "*", 2);
+        testInfixExpression(arr.Elements[2], 3, "+", 3);
+    }
+
+    [Fact]
+    public void testIndexExpressionParsing() {
+        string input = "MyArray[1 + 1]";
+        Lexer lex = new Lexer(input);
+        Parser p = new Parser(lex);
+        Prog program = p.parseProgram(new Prog());
+        program.Should().NotBeNull();
+        checkParserErrors(p);
+        var stmt = program.statements[0] as ExpressionStatement;
+        stmt.Should().NotBeNull();
+        var idx = stmt.expression as IndexExpression;
+        idx.Should().NotBeNull();
+
+        testIdentifier(idx.exp, "MyArray");
+        testInfixExpression(idx.idx, 1 , "+", 1);
+
     }
 
     public bool testIntegerLiteral(Expression exp, long value) {

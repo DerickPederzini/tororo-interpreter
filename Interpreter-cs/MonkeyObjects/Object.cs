@@ -15,6 +15,7 @@ public readonly record struct Type(string type) {
     internal static string FUNCTION_OBJ = "FUNCTION";
     internal static string STRING_OBJ = "STRING";
     internal static string BUILDIN_OBJ = "BUILDIN";
+    internal static string ARRAY_OBJ = "ARRAY";
 }
 public interface ObjectInterface {
     string ObjectType();
@@ -78,9 +79,9 @@ public class FunctionLiteral() : ObjectInterface {
         List<string> param = new List<string>();
 
         foreach(var s in parameters) {
-            param.Add(s.ToString());
+            param.Add(s.identValue.ToString());
         }
-        return $"fn({string.Join(param.ToString(), ",")})"+"{\n"+body.ToString()+"\n}";
+        return $"fn({string.Join(", ", param)})"+"{\n"+body.ToString()+"\n}";
     }
 
     public string ObjectType() {
@@ -129,3 +130,22 @@ public class BuildIn : ObjectInterface {
         return Type.BUILDIN_OBJ;
     }
 }
+
+public class ArrayObj() : ObjectInterface {
+    internal List<ObjectInterface> list = new List<ObjectInterface>();
+
+    public string Inspect() {
+        var listStr = new List<string>();
+        foreach (var obj in list) {
+            listStr.Add(obj.Inspect());
+        }
+        string val = $"[{string.Join(", ", listStr.ToArray())}]";
+        return val;
+    }
+
+    public string ObjectType() {
+        return Type.ARRAY_OBJ;
+    }
+}
+
+

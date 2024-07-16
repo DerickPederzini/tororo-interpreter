@@ -20,20 +20,26 @@ namespace Interpreter_cs.MonkeyEvaluator {
             switch (node) {
                 case Prog p:
                     return evalProgram(p.statements, env);
+
                 case IntegerLiteral integ:
                     return new IntegerObj(integ.value);
+
                 case StringExpression str:
                     return new StringObj(str.value);
+
                 case ExpressionStatement exp:
                     return Eval(exp.expression, env);
+
                 case Bool boole:
                     return deciderOnBooleanObj(boole.value);
+
                 case PrefixExpression exp:
                     var right = Eval(exp.right, env);
                     if (isError(right)) {
                         return right;
                     }
                     return evalPrefixExpression(exp.operators, right);
+
                 case InfixExpression infix:
                     var l = Eval(infix.leftValue, env);
                     if (isError(l)) {
@@ -44,29 +50,36 @@ namespace Interpreter_cs.MonkeyEvaluator {
                         return r;
                     }
                     return evalInfixExpression(infix.operators, l, r);
+
                 case BlockStatement block:
                     return evalBlockStatements(block, env);
+
                 case IfExpression ifElse:
                     return evalIfElseExpression(ifElse, env);
+
                 case ReturnStatement returnStatement:
                     var ret = Eval(returnStatement.value, env);
                     if (isError(ret)) {
                         return ret;
                     }
                     return new ReturnObj(ret);
+
                 case LetStatement letstmt:
                     var val = Eval(letstmt.value, env);
                     if (isError(val)) {
                         return val;
                     }
                     return env.environment[letstmt.name.identValue] = val;
+
                 case Identifier ident:
                     return evalIdentifier(ident, env);
+
                 case FunctionExpression fn:
                     List<Identifier> param = fn.parameters;
                     var body = fn.functionBody;
                     MkEnvironment fnEnv = new MkEnvironment();
                     return new FunctionLiteral() { parameters = param, env = fnEnv, body = body };
+
                 case CallExpression call:
 
                     var func = Eval(call.identifierExpression, env);
@@ -80,6 +93,14 @@ namespace Interpreter_cs.MonkeyEvaluator {
                     }
                     
                     return applyFunction(func, env, arg);
+
+                case ArrayLiteral array:
+                    List<ObjectInterface> list = evalExpression(array.Elements, env);
+                    if(list.Count == 1 && isError(list[0])) {
+                        return list[0];
+                    }
+                    return new ArrayObj() { list = list };
+
                 default:
                     return References.NULL;
             }

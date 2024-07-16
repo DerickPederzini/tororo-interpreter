@@ -242,4 +242,34 @@ public class StringExpression(Token tok, string val) : Expression {
     }
 }
 
+public class ArrayLiteral(Token tok) : Expression {
+    internal Token token = tok;
+    internal List<Expression> Elements;
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+
+    public override string ToString() {
+        var stmt = new List<string>();
+        foreach (var statement in Elements) {
+            stmt.Add(statement.ToString());
+        }
+        return $"[{string.Join(stmt.ToString(), ", ")}]";
+    }
+}
+
+public class IndexExpression(Token tok) : Expression {
+    internal Token token = tok;
+    internal Expression exp;
+    internal Expression idx;
+
+    public string TokenLiteral() {
+        return token.Literal;
+    }
+    public override string ToString() {
+        return $"({exp.ToString()}[{idx.ToString()}])";
+    }
+}
+
 
