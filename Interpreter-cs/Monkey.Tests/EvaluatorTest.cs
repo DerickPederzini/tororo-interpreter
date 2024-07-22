@@ -293,4 +293,31 @@ public class EvaluatorTest {
         testIntegerObject(result.list[1], 4);
         testIntegerObject(result.list[2], 6);
     }
+
+    public static IEnumerable<object[]> testIndex(){
+        yield return new object[] {"[1, 2, 3] [0]", 1 }; 
+        yield return new object[] {"[1, 2, 3] [1]", 2 }; 
+        yield return new object[] {"[1, 2, 3] [2]", 3 }; 
+        yield return new object[] {"let i = 0; [1][i]", 1 }; 
+        yield return new object[] {"[1, 2, 3] [1 + 1]; }", 3 }; 
+        yield return new object[] {"let myArray = [1, 2, 3]; myArray[2]", 3 }; 
+        yield return new object[] {"let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", 6 }; 
+        yield return new object[] {"let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]", 2 }; 
+        yield return new object[] {"[1, 2, 3] [3]", null }; 
+        yield return new object[] {"[1, 2, 3] [-1]", null }; 
+    }
+
+    [Theory]
+    [MemberData(nameof(testIndex))]
+    public void testArrayIndexExpression(string input, object expected) {
+        var evaluated = testEval(input);
+        evaluated.Should().NotBeNull();
+        if (evaluated is NullObj) {
+            testNullObject(evaluated);
+        }
+        else {
+            var integer = Convert.ToInt64(expected);
+            testIntegerObject(evaluated, integer);
+        }
+    }
 }

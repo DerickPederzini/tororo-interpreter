@@ -259,7 +259,7 @@ public class ArrayLiteral(Token tok) : Expression {
     }
 }
 
-public class IndexExpression(Token tok) : Expression {
+public class IndexExpressions(Token tok) : Expression {
     internal Token token = tok;
     internal Expression exp;
     internal Expression idx;

@@ -387,7 +387,7 @@ public class Parser {
     }
 
     private Expression parseIndexExpression(Expression left) {
-        var index = new IndexExpression(currentToken) { exp = left };
+        var index = new IndexExpressions(currentToken) { exp = left };
         nextTk();
 
         index.idx = parseExpression((int)Precedences.LOWEST);

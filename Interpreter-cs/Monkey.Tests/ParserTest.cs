@@ -467,7 +467,7 @@ public class ParserTest {
         checkParserErrors(p);
         var stmt = program.statements[0] as ExpressionStatement;
         stmt.Should().NotBeNull();
-        var idx = stmt.expression as IndexExpression;
+        var idx = stmt.expression as IndexExpressions;
         idx.Should().NotBeNull();
 
         testIdentifier(idx.exp, "MyArray");

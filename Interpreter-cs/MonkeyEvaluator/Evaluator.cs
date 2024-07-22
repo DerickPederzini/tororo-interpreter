@@ -88,22 +88,55 @@ namespace Interpreter_cs.MonkeyEvaluator {
                     }
 
                     var arg = evalExpression(call.arguments, env);
-                    if(arg.Count == 1 && isError(arg[0])) {
+                    if (arg.Count == 1 && isError(arg[0])) {
                         return arg[0];
                     }
-                    
+
                     return applyFunction(func, env, arg);
 
                 case ArrayLiteral array:
                     List<ObjectInterface> list = evalExpression(array.Elements, env);
-                    if(list.Count == 1 && isError(list[0])) {
+                    if (list.Count == 1 && isError(list[0])) {
                         return list[0];
                     }
                     return new ArrayObj() { list = list };
+                case IndexExpressions index:
+                    var left = Eval(index.exp, env);
+                    if (isError(left)) {
+                        return left;
+                    }
+                    var idx = Eval(index.idx, env);
+                    if (isError(idx)) {
+                        return idx;
+                    }
+                    return evalIndexExpression(left, idx);
 
                 default:
                     return References.NULL;
             }
+        }
+
+        private ObjectInterface evalIndexExpression(ObjectInterface left, ObjectInterface idx) {
+            switch (left) {
+                case ArrayObj lft:
+                    if (idx is IntegerObj ind) {
+                        return evalArrayIndexExpression(lft, ind);
+                    }
+                    else {
+                        return ErrorFound("index operator not suported " + left.ObjectType());
+                    }
+                default: 
+                    return ErrorFound("index operator not supported "+left.ObjectType());
+            }
+        }
+
+        private ObjectInterface evalArrayIndexExpression(ArrayObj left, IntegerObj idx) {
+            var arrObj = left.list.ToArray();
+            var max = left.list.Count - 1;
+            if (idx.value < 0 || idx.value > max) {
+                return References.NULL;
+            }
+            return arrObj[idx.value];
         }
 
         private ObjectInterface applyFunction(ObjectInterface fn, MkEnvironment env, List<ObjectInterface> arg) {
