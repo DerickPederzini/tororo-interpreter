@@ -111,12 +111,44 @@ public class Builds() {
         }
 
         switch (obj[0]) {
+            case ArrayObj array:
+                return new IntegerObj(val: array.list.Count);
             case StringObj str:
                 return new IntegerObj(str.value.Length);
             default:
                 return new ErrorObj() { message = "argument to len not supported, got " + obj[0].ObjectType() };
         }
    }
+
+    public static ObjectInterface first(params ObjectInterface[] obj) {
+        if (obj.Length != 1) {
+            return new ErrorObj() { message = $"wrong number of arguments. got={obj.Length}, want=1" };
+        }
+        if (obj[0].ObjectType() != "ARRAY") {
+            return new ErrorObj() { message = $"argument to rest must be ARRAY, got {obj[0].ObjectType()}" };
+        }
+        var arr = obj[0] as ArrayObj;
+        if (arr.list.Count > 0) {
+            return arr.list[0];
+        }
+        return null;
+    }
+
+        public static ObjectInterface last(params ObjectInterface[] obj) {
+        if (obj.Length != 1) {
+            return new ErrorObj() { message = $"wrong number of arguments. got={obj.Length}, want=1" };
+        }
+        if (obj[0].ObjectType() != "ARRAY") {
+            return new ErrorObj() { message = $"argument to rest must be ARRAY, got {obj[0].ObjectType()}" };
+        }
+        var arr = obj[0] as ArrayObj;
+        var len = arr.list.Count - 1;
+        if (len > 0) {
+            return arr.list[len];
+        }
+        return null;
+    }
+
 }
 public class BuildIn : ObjectInterface {
 

@@ -9,6 +9,8 @@ namespace Interpreter_cs.MonkeyEvaluator {
         public Builtins() {
             builtins = new Dictionary<string, BuildIn>() { 
                 {"len", new BuildIn() { fn = Builds.len } },
+                {"first", new BuildIn() { fn = Builds.first } },
+                {"last", new BuildIn() { fn = Builds.last } }
             };
         }
 
