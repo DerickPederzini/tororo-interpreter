@@ -142,13 +142,45 @@ public class Builds() {
             return new ErrorObj() { message = $"argument to rest must be ARRAY, got {obj[0].ObjectType()}" };
         }
         var arr = obj[0] as ArrayObj;
-        var len = arr.list.Count - 1;
+        var len = arr.list.Count;
         if (len > 0) {
-            return arr.list[len];
+            return arr.list[len - 1];
         }
         return null;
     }
 
+
+    public static ObjectInterface rest(params ObjectInterface[] obj) {
+        if (obj.Length != 1) {
+            return new ErrorObj() { message = $"wrong number of arguments. got={obj.Length}, want=1" };
+        }
+        if (obj[0].ObjectType() != "ARRAY") {
+            return new ErrorObj() { message = $"argument to rest must be ARRAY, got {obj[0].ObjectType()}" };
+        }
+        var arr = obj[0] as ArrayObj;
+        var len = arr.list.Count;
+        if (len > 0) {
+            var newElem = new List<ObjectInterface>();
+            newElem = arr.list;
+            return new ArrayObj() { list = newElem };
+        }
+        return null;
+    }
+
+    public static ObjectInterface push(params ObjectInterface[] obj) {
+        if (obj.Length != 2) {
+            return new ErrorObj() { message = $"wrong number of arguments. got={obj.Length}, want=1" };
+        }
+        if (obj[0].ObjectType() != "ARRAY") {
+            return new ErrorObj() { message = $"argument to rest must be ARRAY, got {obj[0].ObjectType()}" };
+        }
+        var arr = obj[0] as ArrayObj;
+        var len = arr.list.Count;
+        var newElem = new List<ObjectInterface>();
+        newElem = arr.list;
+        newElem.Add(obj[1]);
+        return new ArrayObj() { list = newElem };
+    }
 }
 public class BuildIn : ObjectInterface {
 

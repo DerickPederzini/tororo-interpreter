@@ -10,7 +10,10 @@ namespace Interpreter_cs.MonkeyEvaluator {
             builtins = new Dictionary<string, BuildIn>() { 
                 {"len", new BuildIn() { fn = Builds.len } },
                 {"first", new BuildIn() { fn = Builds.first } },
-                {"last", new BuildIn() { fn = Builds.last } }
+                {"last", new BuildIn() { fn = Builds.last } },
+                {"rest", new BuildIn() { fn = Builds.rest } },
+                {"push", new BuildIn() { fn = Builds.push} }
+                
             };
         }
 
