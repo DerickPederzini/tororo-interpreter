@@ -231,7 +231,32 @@ public class Builds() {
 
         return new ArrayObj() { list = newElem };
     }
+
+    public static ObjectInterface sort(params ObjectInterface[] obj) {
+        if (obj.Length != 1) {
+            return new ErrorObj() { message = $"wrong number of arguments. got={obj.Length}, want=1" };
+        }
+        
+        if(obj[0].ObjectType() != "ARRAY") {
+            return new ErrorObj() { message = $"argument to sort must be an ARRAY, got {obj[0].ObjectType()}" };
+        }
+        var arr = obj[0] as ArrayObj;
+        var newElem = new List<ObjectInterface>();
+        newElem = arr.list;
+        newElem = Sorts.bogoSort(newElem);
+
+        return new ArrayObj() { list = newElem };
+    }
 }
+
+public interface Sorts{
+    public static List<ObjectInterface> bogoSort(List<ObjectInterface> obj) {
+        //implement this as a meme :)
+        return null;   
+    }
+    
+}
+
 public class BuildIn : ObjectInterface {
 
     internal BuildInFunction fn;
