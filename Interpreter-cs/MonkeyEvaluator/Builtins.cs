@@ -13,8 +13,8 @@ namespace Interpreter_cs.MonkeyEvaluator {
                 {"last", new BuildIn() { fn = Builds.last } },
                 {"rest", new BuildIn() { fn = Builds.rest } },
                 {"push", new BuildIn() { fn = Builds.push} },
-                {"remove", new BuildIn() {fn = Builds.remove} }
-                
+                {"remove", new BuildIn() {fn = Builds.remove} },
+                {"removeAt", new BuildIn () {fn = Builds.removeAt} }
             };
         }
 

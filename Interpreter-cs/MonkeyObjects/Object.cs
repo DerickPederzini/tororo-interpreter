@@ -206,6 +206,31 @@ public class Builds() {
         }
         return new ArrayObj() { list = newElem };
     }
+
+    public static ObjectInterface removeAt(params ObjectInterface[] obj) {
+        if (obj.Length != 2) {
+            return new ErrorObj() { message = $"wrong number of arguments. got={obj.Length}, want=1" };
+        }
+        if (obj[0].ObjectType() != "ARRAY") {
+            return new ErrorObj() { message = $"argument to remove must be an ARRAY, got {obj[0].ObjectType()}" };
+        }
+        var arr = obj[0] as ArrayObj;
+        var newElem = new List<ObjectInterface>();
+        newElem = arr.list;
+        var value = obj[1] as IntegerObj;
+
+        if (value.value > newElem.Count) {
+            return new ErrorObj() { message = $"Index is out of bound for the array" };
+        }
+
+        for (int i = 0; i <= value.value; i++) {
+            if(i == value.value){
+                newElem.RemoveAt(i);
+            }
+        }
+
+        return new ArrayObj() { list = newElem };
+    }
 }
 public class BuildIn : ObjectInterface {
 
