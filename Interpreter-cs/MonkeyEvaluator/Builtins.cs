@@ -11,8 +11,13 @@ namespace Interpreter_cs.MonkeyEvaluator {
                 {"first", new BuildIn() { fn = Builds.first } },
                 {"last", new BuildIn() { fn = Builds.last } },
                 {"rest", new BuildIn() { fn = Builds.rest } },
-                {"push", new BuildIn() { fn = Builds.push} }
+                {"push", new BuildIn() { fn = Builds.push} },
+                {"remove", new BuildIn() {fn = Builds.remove} },
+                {"removeAt", new BuildIn () {fn = Builds.removeAt} },
+                {"sOrT", new BuildIn () {fn = Builds.sOrT } },
+                {"sort", new BuildIn () {fn = Builds.sort } }
             };
         }
+
     }
 }

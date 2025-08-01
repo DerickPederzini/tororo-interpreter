@@ -181,7 +181,159 @@ public class Builds() {
         newElem.Add(obj[1]);
         return new ArrayObj() { list = newElem };
     }
+
+    public static ObjectInterface remove(params ObjectInterface[] obj) {
+        if (obj.Length != 2) {
+            return new ErrorObj() { message = $"wrong number of arguments. got={obj.Length}, want=1"};
+        }
+        if (obj[0].ObjectType() != "ARRAY") {
+            return new ErrorObj() { message = $"argument to remove must be an ARRAY, got {obj[0].ObjectType()}" };
+        }
+        var arr = obj[0] as ArrayObj;
+        var newElem = new List<ObjectInterface>();
+        newElem = arr.list;
+        bool found = false;
+        var value = obj[1] as IntegerObj;
+        foreach (IntegerObj i in newElem) {
+            if(i.value == value.value) {
+                newElem.Remove(i);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return new ErrorObj() { message = $"could not find the element to remove in the array" };
+        }
+        return new ArrayObj() { list = newElem };
+    }
+
+    public static ObjectInterface removeAt(params ObjectInterface[] obj) {
+        if (obj.Length != 2) {
+            return new ErrorObj() { message = $"wrong number of arguments. got={obj.Length}, want=1" };
+        }
+        if (obj[0].ObjectType() != "ARRAY") {
+            return new ErrorObj() { message = $"argument to remove must be an ARRAY, got {obj[0].ObjectType()}" };
+        }
+        var arr = obj[0] as ArrayObj;
+        var newElem = new List<ObjectInterface>();
+        newElem = arr.list;
+        var value = obj[1] as IntegerObj;
+
+        if (value.value > newElem.Count) {
+            return new ErrorObj() { message = $"Index is out of bound for the array" };
+        }
+
+        for (int i = 0; i <= value.value; i++) {
+            if(i == value.value){
+                newElem.RemoveAt(i);
+            }
+        }
+
+        return new ArrayObj() { list = newElem };
+    }
+
+    public static ObjectInterface sOrT(params ObjectInterface[] obj) {
+        if (obj.Length != 1) {
+            return new ErrorObj() { message = $"wrong number of arguments. got={obj.Length}, want=1" };
+        }
+        
+        if(obj[0].ObjectType() != "ARRAY") {
+            return new ErrorObj() { message = $"argument to sort must be an ARRAY, got {obj[0].ObjectType()}" };
+        }
+        var arr = obj[0] as ArrayObj;
+        var newElem = new List<ObjectInterface>();
+        newElem = arr.list;
+        newElem = Sorts.bogoSort(newElem);
+
+        return new ArrayObj() { list = newElem };
+    }
+    public static ObjectInterface sort
+        (params ObjectInterface[] obj)
+    {
+        if (obj.Length != 1)
+        {
+            return new ErrorObj() { message = $"wrong number of arguments. got={obj.Length}, want=1" };
+        }
+
+        if (obj[0].ObjectType() != "ARRAY")
+        {
+            return new ErrorObj() { message = $"argument to sort must be an ARRAY, got {obj[0].ObjectType()}" };
+        }
+        var arr = obj[0] as ArrayObj;
+        var newElem = new List<ObjectInterface>();
+        newElem = arr.list;
+        newElem = Sorts.sort(newElem);
+
+        return new ArrayObj() { list = newElem };
+    }
 }
+
+public interface Sorts{
+
+
+    public static List<ObjectInterface> sort(List<ObjectInterface> list)
+    {
+        //implement normal sort later
+        return null;
+    }
+
+
+    public static List<ObjectInterface> bogoSort(List<ObjectInterface> list)
+    {
+        double attempts = 0;
+        //implement this as a meme :)
+        while(!isSorted(list))
+        {
+            attempts++;
+            shuffle(list);
+        }
+        double fact = 1;
+        for(int i = list.Count; i >= 1; i--) {
+            fact *= i;
+        }
+        Console.WriteLine($"Congrats, you did it exaclty {attempts} attenpts");
+        Console.WriteLine($"With a probability of {(double)(attempts/(double)list.Count * fact)}");
+        return list;
+    }
+    public static bool isSorted(List<ObjectInterface> list)
+    {
+        int n = list.Count - 1;
+        for (int i = 0; i < n; i++)
+        {
+        List<IntegerObj> li = new List<IntegerObj>();
+            foreach(IntegerObj j in list)
+            {
+                li.Add((IntegerObj)j);
+                Console.Write(j.value+",");
+            }
+            Console.WriteLine(" ");
+            if (li[i].value > li[i+1].value)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    public static void shuffle(List<ObjectInterface> list)
+    {
+        ObjectInterface i;
+        int t;
+        ObjectInterface r;
+        Random rand = new Random();
+
+        for (int j = 0; j < list.Count; j++)
+        {
+            i = list.ElementAt(j);
+            t = rand.Next(0, list.Count);
+            list[j] = list[t];
+            list[t] = i;
+        }
+    }
+    
+}
+
 public class BuildIn : ObjectInterface {
     internal BuildInFunction fn;
     public string Inspect() {
@@ -193,6 +345,7 @@ public class BuildIn : ObjectInterface {
 }
 
 public class ArrayObj() : ObjectInterface {
+
     internal List<ObjectInterface> list = new List<ObjectInterface>();
     public string Inspect() {
         var listStr = new List<string>();
