@@ -13,9 +13,7 @@ using System.Security.Principal;
 using Xunit;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-
 namespace Interpreter_cs.Monkey.Tests;
-
 public class ParserTest {
 
     public static IEnumerable<object[]> testLet() {
@@ -330,7 +328,6 @@ public class ParserTest {
 
     [Fact]
     public void testFunctionLiteralParsing() {
-
         string input = "fn(x, y) { x + y }";
 
         Lexer lex = new Lexer(input);
@@ -360,19 +357,17 @@ public class ParserTest {
         Assert.IsInstanceOfType(bodyStmt, typeof(ExpressionStatement), $"Expected bodyStmt to be of type Expression Statement, but it is a {bodyStmt.GetType()}");
 
         testInfixExpression(bodyStmt.expression, "x", "+", "y");
-
-    }   
+    }
+    
     public static IEnumerable<object[]> testFnParameters() {
         yield return new object[] { "fn() {};", new string[] { } };
         yield return new object[] { "fn(x) {};", new string[] { "x" } };
         yield return new object[] { "fn(x, y, z) {};", new string[] { "x", "y", "z" } };
     }
 
-
     [Theory]
     [MemberData(nameof(testFnParameters))]
     public void testFunctionParametersParsing(string input, string[] expected) {
-
         Lexer lex = new Lexer(input);
         Parser p = new Parser(lex);
         Prog program = p.parseProgram(new Prog());
@@ -387,12 +382,10 @@ public class ParserTest {
         for (int i = 0; i < expected.Length; i++) {
             testLiteralExpression(function.parameters[i], expected[i]);
         }
-
     }
 
     [Fact]
     public void testCallExpressionParsing() {
-
         string input = "add(1, 2 * 3, 4 + 5);";
         Lexer lex = new Lexer(input);
         Parser p = new Parser(lex);
@@ -413,7 +406,6 @@ public class ParserTest {
         if (!testIdentifier(exp.identifierExpression, "add")) {
             return;
         }
-
         exp.arguments.Count.Should().Be(3, $"Wrong length of arguments for expression, got {exp.arguments.Count} instead of 3");
 
         testLiteralExpression(exp.arguments[0], 1);
@@ -472,7 +464,6 @@ public class ParserTest {
 
         testIdentifier(idx.exp, "MyArray");
         testInfixExpression(idx.idx, 1 , "+", 1);
-
     }
 
     public bool testIntegerLiteral(Expression exp, long value) {
@@ -539,7 +530,6 @@ public class ParserTest {
         if (!testLiteralExpression(opExp.leftValue, left)) {
             return false;
         }
-
         return true;
     }
 

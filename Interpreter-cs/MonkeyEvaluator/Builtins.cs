@@ -3,7 +3,6 @@ using Interpreter_cs.MonkeyObjects;
 
 namespace Interpreter_cs.MonkeyEvaluator {
     public class Builtins {
-        
         internal Dictionary<string, BuildIn> builtins = new Dictionary<string, BuildIn>();
 
         public Builtins() {
@@ -13,9 +12,7 @@ namespace Interpreter_cs.MonkeyEvaluator {
                 {"last", new BuildIn() { fn = Builds.last } },
                 {"rest", new BuildIn() { fn = Builds.rest } },
                 {"push", new BuildIn() { fn = Builds.push} }
-                
             };
         }
-
     }
 }

@@ -183,13 +183,10 @@ public class Builds() {
     }
 }
 public class BuildIn : ObjectInterface {
-
     internal BuildInFunction fn;
-
     public string Inspect() {
         return "buildin function";
     }
-
     public string ObjectType() {
         return Type.BUILDIN_OBJ;
     }
@@ -197,7 +194,6 @@ public class BuildIn : ObjectInterface {
 
 public class ArrayObj() : ObjectInterface {
     internal List<ObjectInterface> list = new List<ObjectInterface>();
-
     public string Inspect() {
         var listStr = new List<string>();
         foreach (var obj in list) {

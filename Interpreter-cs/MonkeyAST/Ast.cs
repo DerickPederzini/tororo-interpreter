@@ -2,6 +2,7 @@
 
 namespace Interpreter_cs.MonkeyAST;
 
+//Abstract Syntax Tree
 public class Prog : Node{
     internal List<Statement> statements = new List<Statement>();
     public string TokenLiteral() {
@@ -13,7 +14,6 @@ public class Prog : Node{
         }
     }
     public override string ToString() {
-
         string outString = "";
 
         for (int i = 0; i < statements.Count; i++){
